@@ -35,6 +35,34 @@ public class PhotoBoothService {
         return new PhotoBoothResponseDto(photoBooth);
     }
     
+    // 근처 네컷사진관 검색
+    @Transactional(readOnly = true)
+    public List<PhotoBoothResponseDto> getNearbyPhotoBooths(double latitude, double longitude, double radius) {
+        List<PhotoBooth> allBooths = photoBoothRepository.findAll();
+        
+        return allBooths.stream()
+                .filter(booth -> {
+                    double distance = calculateDistance(latitude, longitude, booth.getLatitude(), booth.getLongitude());
+                    return distance <= radius;
+                })
+                .map(PhotoBoothResponseDto::new)
+                .collect(Collectors.toList());
+    }
+    
+    // Haversine 공식을 사용한 거리 계산 (km)
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // 지구 반지름 (km)
+        
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        
+        return R * c; // 거리 (km)
+    }
+    
     // 네컷사진관 생성
     public PhotoBoothResponseDto createPhotoBooth(PhotoBoothRequestDto requestDto) {
         PhotoBooth photoBooth = new PhotoBooth(
@@ -86,7 +114,7 @@ public class PhotoBoothService {
     // 키워드로 검색
     @Transactional(readOnly = true)
     public List<PhotoBoothResponseDto> searchPhotoBooths(String keyword) {
-        return photoBoothRepository.findByKeyword(keyword)
+        return photoBoothRepository.findByNameContainingIgnoreCaseOrAddressContainingIgnoreCase(keyword, keyword)
                 .stream()
                 .map(PhotoBoothResponseDto::new)
                 .collect(Collectors.toList());
@@ -96,18 +124,6 @@ public class PhotoBoothService {
     @Transactional(readOnly = true)
     public List<PhotoBoothResponseDto> getPhotoBoothsByBrand(String brand) {
         return photoBoothRepository.findByBrandContainingIgnoreCase(brand)
-                .stream()
-                .map(PhotoBoothResponseDto::new)
-                .collect(Collectors.toList());
-    }
-    
-    // 근처 네컷사진관 검색 (기본 반경 5km)
-    @Transactional(readOnly = true)
-    public List<PhotoBoothResponseDto> getNearbyPhotoBooths(Double latitude, Double longitude, Double radius) {
-        if (radius == null) {
-            radius = 5.0; // 기본 반경 5km
-        }
-        return photoBoothRepository.findByLocationNear(latitude, longitude, radius)
                 .stream()
                 .map(PhotoBoothResponseDto::new)
                 .collect(Collectors.toList());
