@@ -21,11 +21,7 @@ public interface PhotoBoothRepository extends JpaRepository<PhotoBooth, Long> {
     List<PhotoBooth> findByAddressContainingIgnoreCase(String address);
     
     // 이름 또는 주소로 검색
-    @Query("SELECT p FROM PhotoBooth p WHERE " +
-           "LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(p.address) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(p.roadAddress) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    List<PhotoBooth> findByKeyword(@Param("keyword") String keyword);
+    List<PhotoBooth> findByNameContainingIgnoreCaseOrAddressContainingIgnoreCase(String name, String address);
     
     // 특정 좌표 근처의 네컷사진관 찾기 (반경 내 검색, 단위: km)
     @Query("SELECT p FROM PhotoBooth p WHERE " +
