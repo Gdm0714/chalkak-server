@@ -1,10 +1,24 @@
 package com.min.chalkakserver.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "photo_booths")
+@Table(name = "photo_booths", 
+    indexes = {
+        @Index(name = "idx_location", columnList = "latitude,longitude"),
+        @Index(name = "idx_brand", columnList = "brand"),
+        @Index(name = "idx_name", columnList = "name")
+    })
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PhotoBooth {
     
     @Id
@@ -56,129 +70,5 @@ public class PhotoBooth {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-    }
-    
-    // Default constructor
-    public PhotoBooth() {}
-    
-    // Constructor
-    public PhotoBooth(String name, String brand, String address, String roadAddress, 
-                     Double latitude, Double longitude, String operatingHours, 
-                     String phoneNumber, String description, String priceInfo) {
-        this.name = name;
-        this.brand = brand;
-        this.address = address;
-        this.roadAddress = roadAddress;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.operatingHours = operatingHours;
-        this.phoneNumber = phoneNumber;
-        this.description = description;
-        this.priceInfo = priceInfo;
-    }
-    
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-    
-    public void setId(Long id) {
-        this.id = id;
-    }
-    
-    public String getName() {
-        return name;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public String getBrand() {
-        return brand;
-    }
-    
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-    
-    public String getAddress() {
-        return address;
-    }
-    
-    public void setAddress(String address) {
-        this.address = address;
-    }
-    
-    public String getRoadAddress() {
-        return roadAddress;
-    }
-    
-    public void setRoadAddress(String roadAddress) {
-        this.roadAddress = roadAddress;
-    }
-    
-    public Double getLatitude() {
-        return latitude;
-    }
-    
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-    
-    public Double getLongitude() {
-        return longitude;
-    }
-    
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-    
-    public String getOperatingHours() {
-        return operatingHours;
-    }
-    
-    public void setOperatingHours(String operatingHours) {
-        this.operatingHours = operatingHours;
-    }
-    
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-    
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-    
-    public String getDescription() {
-        return description;
-    }
-    
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    
-    public String getPriceInfo() {
-        return priceInfo;
-    }
-    
-    public void setPriceInfo(String priceInfo) {
-        this.priceInfo = priceInfo;
-    }
-    
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-    
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-    
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-    
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }
