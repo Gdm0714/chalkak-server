@@ -1,11 +1,11 @@
 package com.min.chalkakserver.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,9 +16,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_name", columnList = "name")
     })
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PhotoBooth {
     
     @Id
@@ -70,5 +68,36 @@ public class PhotoBooth {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+    
+    @Builder
+    public PhotoBooth(String name, String brand, String address, String roadAddress, 
+                     Double latitude, Double longitude, String operatingHours, 
+                     String phoneNumber, String description, String priceInfo) {
+        this.name = name;
+        this.brand = brand;
+        this.address = address;
+        this.roadAddress = roadAddress;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.operatingHours = operatingHours;
+        this.phoneNumber = phoneNumber;
+        this.description = description;
+        this.priceInfo = priceInfo;
+    }
+    
+    public void update(String name, String brand, String address, String roadAddress,
+                      Double latitude, Double longitude, String operatingHours,
+                      String phoneNumber, String description, String priceInfo) {
+        this.name = name;
+        this.brand = brand;
+        this.address = address;
+        this.roadAddress = roadAddress;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.operatingHours = operatingHours;
+        this.phoneNumber = phoneNumber;
+        this.description = description;
+        this.priceInfo = priceInfo;
     }
 }
