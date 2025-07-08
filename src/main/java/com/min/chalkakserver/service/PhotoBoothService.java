@@ -3,129 +3,176 @@ package com.min.chalkakserver.service;
 import com.min.chalkakserver.dto.PhotoBoothRequestDto;
 import com.min.chalkakserver.dto.PhotoBoothResponseDto;
 import com.min.chalkakserver.entity.PhotoBooth;
+import com.min.chalkakserver.exception.InvalidLocationException;
+import com.min.chalkakserver.exception.PhotoBoothNotFoundException;
 import com.min.chalkakserver.repository.PhotoBoothRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PhotoBoothService {
     
-    @Autowired
-    private PhotoBoothRepository photoBoothRepository;
+    private final PhotoBoothRepository photoBoothRepository;
     
     // 모든 네컷사진관 조회
     @Transactional(readOnly = true)
+    @Cacheable(value = "photoBooths", key = "#root.target + #root.methodName", unless = "#result == null || #result.isEmpty()")
     public List<PhotoBoothResponseDto> getAllPhotoBooths() {
+        log.info("모든 네컷사진관 조회 - DB에서 데이터 조회");
         return photoBoothRepository.findAll()
                 .stream()
-                .map(PhotoBoothResponseDto::new)
+                .map(PhotoBoothResponseDto::from)
                 .collect(Collectors.toList());
     }
     
     // ID로 네컷사진관 조회
     @Transactional(readOnly = true)
+    @Cacheable(value = "photoBooth", key = "#id", unless = "#result == null")
     public PhotoBoothResponseDto getPhotoBoothById(Long id) {
+        log.info("ID {} 로 네컷사진관 조회 - DB에서 데이터 조회", id);
         PhotoBooth photoBooth = photoBoothRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("네컷사진관을 찾을 수 없습니다. ID: " + id));
-        return new PhotoBoothResponseDto(photoBooth);
+                .orElseThrow(() -> new PhotoBoothNotFoundException(id));
+        return PhotoBoothResponseDto.from(photoBooth);
     }
     
     // 근처 네컷사진관 검색
     @Transactional(readOnly = true)
+    @Cacheable(value = "nearbyPhotoBooths", keyGenerator = "locationKeyGenerator", unless = "#result == null || #result.isEmpty()")
     public List<PhotoBoothResponseDto> getNearbyPhotoBooths(double latitude, double longitude, double radius) {
-        List<PhotoBooth> allBooths = photoBoothRepository.findAll();
+        log.info("근처 네컷사진관 검색 - 위도: {}, 경도: {}, 반경: {}km - DB에서 데이터 조회", latitude, longitude, radius);
         
-        return allBooths.stream()
-                .filter(booth -> {
-                    double distance = calculateDistance(latitude, longitude, booth.getLatitude(), booth.getLongitude());
-                    return distance <= radius;
-                })
-                .map(PhotoBoothResponseDto::new)
+        // 위치 유효성 검증
+        validateLocation(latitude, longitude, radius);
+        
+        // Bounding Box 계산 (대략적인 범위 필터링)
+        double latRange = radius / 111.0; // 1도 = 약 111km
+        double lonRange = radius / (111.0 * Math.cos(Math.toRadians(latitude)));
+        
+        double minLat = latitude - latRange;
+        double maxLat = latitude + latRange;
+        double minLon = longitude - lonRange;
+        double maxLon = longitude + lonRange;
+        
+        // Spatial Index를 활용한 쿼리 실행
+        List<PhotoBooth> nearbyBooths = photoBoothRepository.findNearbyPhotoBooths(
+            latitude, longitude, radius, minLat, maxLat, minLon, maxLon
+        );
+        
+        return nearbyBooths.stream()
+                .map(PhotoBoothResponseDto::from)
                 .collect(Collectors.toList());
     }
     
-    // Haversine 공식을 사용한 거리 계산 (km)
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        final int R = 6371; // 지구 반지름 (km)
-        
-        double latDistance = Math.toRadians(lat2 - lat1);
-        double lonDistance = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        
-        return R * c; // 거리 (km)
-    }
-    
     // 네컷사진관 생성
+    @Caching(evict = {
+        @CacheEvict(value = "photoBooths", allEntries = true),
+        @CacheEvict(value = "nearbyPhotoBooths", allEntries = true),
+        @CacheEvict(value = "searchResults", allEntries = true),
+        @CacheEvict(value = "brandPhotoBooths", allEntries = true)
+    })
     public PhotoBoothResponseDto createPhotoBooth(PhotoBoothRequestDto requestDto) {
-        PhotoBooth photoBooth = new PhotoBooth(
-                requestDto.getName(),
-                requestDto.getBrand(),
-                requestDto.getAddress(),
-                requestDto.getRoadAddress(),
-                requestDto.getLatitude(),
-                requestDto.getLongitude(),
-                requestDto.getOperatingHours(),
-                requestDto.getPhoneNumber(),
-                requestDto.getDescription(),
-                requestDto.getPriceInfo()
-        );
+        log.info("네컷사진관 생성 - 이름: {}", requestDto.getName());
+        
+        // DTO를 Entity로 변환
+        PhotoBooth photoBooth = requestDto.toEntity();
         
         PhotoBooth savedPhotoBooth = photoBoothRepository.save(photoBooth);
-        return new PhotoBoothResponseDto(savedPhotoBooth);
+        
+        // Entity를 DTO로 변환하여 반환
+        return PhotoBoothResponseDto.from(savedPhotoBooth);
     }
     
     // 네컷사진관 수정
+    @Caching(evict = {
+        @CacheEvict(value = "photoBooths", allEntries = true),
+        @CacheEvict(value = "photoBooth", key = "#id"),
+        @CacheEvict(value = "nearbyPhotoBooths", allEntries = true),
+        @CacheEvict(value = "searchResults", allEntries = true),
+        @CacheEvict(value = "brandPhotoBooths", allEntries = true)
+    })
     public PhotoBoothResponseDto updatePhotoBooth(Long id, PhotoBoothRequestDto requestDto) {
-        PhotoBooth photoBooth = photoBoothRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("네컷사진관을 찾을 수 없습니다. ID: " + id));
+        log.info("네컷사진관 수정 - ID: {}", id);
         
-        // 업데이트
-        photoBooth.setName(requestDto.getName());
-        photoBooth.setBrand(requestDto.getBrand());
-        photoBooth.setAddress(requestDto.getAddress());
-        photoBooth.setRoadAddress(requestDto.getRoadAddress());
-        photoBooth.setLatitude(requestDto.getLatitude());
-        photoBooth.setLongitude(requestDto.getLongitude());
-        photoBooth.setOperatingHours(requestDto.getOperatingHours());
-        photoBooth.setPhoneNumber(requestDto.getPhoneNumber());
-        photoBooth.setDescription(requestDto.getDescription());
-        photoBooth.setPriceInfo(requestDto.getPriceInfo());
+        PhotoBooth photoBooth = photoBoothRepository.findById(id)
+                .orElseThrow(() -> new PhotoBoothNotFoundException(id));
+        
+        // update 메서드를 사용하여 엔티티 업데이트
+        photoBooth.update(
+            requestDto.getName(),
+            requestDto.getBrand(),
+            requestDto.getAddress(),
+            requestDto.getRoadAddress(),
+            requestDto.getLatitude(),
+            requestDto.getLongitude(),
+            requestDto.getOperatingHours(),
+            requestDto.getPhoneNumber(),
+            requestDto.getDescription(),
+            requestDto.getPriceInfo()
+        );
         
         PhotoBooth updatedPhotoBooth = photoBoothRepository.save(photoBooth);
-        return new PhotoBoothResponseDto(updatedPhotoBooth);
+        return PhotoBoothResponseDto.from(updatedPhotoBooth);
     }
     
     // 네컷사진관 삭제
+    @Caching(evict = {
+        @CacheEvict(value = "photoBooths", allEntries = true),
+        @CacheEvict(value = "photoBooth", key = "#id"),
+        @CacheEvict(value = "nearbyPhotoBooths", allEntries = true),
+        @CacheEvict(value = "searchResults", allEntries = true),
+        @CacheEvict(value = "brandPhotoBooths", allEntries = true)
+    })
     public void deletePhotoBooth(Long id) {
+        log.info("네컷사진관 삭제 - ID: {}", id);
         if (!photoBoothRepository.existsById(id)) {
-            throw new RuntimeException("네컷사진관을 찾을 수 없습니다. ID: " + id);
+            throw new PhotoBoothNotFoundException(id);
         }
         photoBoothRepository.deleteById(id);
     }
     
     // 키워드로 검색
     @Transactional(readOnly = true)
+    @Cacheable(value = "searchResults", key = "#keyword", unless = "#result == null || #result.isEmpty()")
     public List<PhotoBoothResponseDto> searchPhotoBooths(String keyword) {
+        log.info("키워드로 검색 - 키워드: {} - DB에서 데이터 조회", keyword);
         return photoBoothRepository.findByNameContainingIgnoreCaseOrAddressContainingIgnoreCase(keyword, keyword)
                 .stream()
-                .map(PhotoBoothResponseDto::new)
+                .map(PhotoBoothResponseDto::from)
                 .collect(Collectors.toList());
     }
     
     // 브랜드로 검색
     @Transactional(readOnly = true)
+    @Cacheable(value = "brandPhotoBooths", key = "#brand", unless = "#result == null || #result.isEmpty()")
     public List<PhotoBoothResponseDto> getPhotoBoothsByBrand(String brand) {
+        log.info("브랜드로 검색 - 브랜드: {} - DB에서 데이터 조회", brand);
         return photoBoothRepository.findByBrandContainingIgnoreCase(brand)
                 .stream()
-                .map(PhotoBoothResponseDto::new)
+                .map(PhotoBoothResponseDto::from)
                 .collect(Collectors.toList());
+    }
+    
+    // 위치 유효성 검증 메서드
+    private void validateLocation(double latitude, double longitude, double radius) {
+        if (latitude < -90 || latitude > 90) {
+            throw new InvalidLocationException("위도는 -90도에서 90도 사이여야 합니다. 입력값: " + latitude);
+        }
+        if (longitude < -180 || longitude > 180) {
+            throw new InvalidLocationException("경도는 -180도에서 180도 사이여야 합니다. 입력값: " + longitude);
+        }
+        if (radius <= 0 || radius > 50) {
+            throw new InvalidLocationException("검색 반경은 0km 초과 50km 이하여야 합니다. 입력값: " + radius);
+        }
     }
 }
