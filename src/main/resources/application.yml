@@ -75,3 +75,16 @@ management:
 # CORS 설정
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:*,https://localhost:*}
+
+# SpringDoc (Swagger) 설정
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
