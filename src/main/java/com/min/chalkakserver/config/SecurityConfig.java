@@ -26,10 +26,16 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
+                // Swagger UI 및 API 문서 허용 (가장 먼저 체크)
+                .requestMatchers(
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**",
+                    "/swagger-resources/**",
+                    "/webjars/**"
+                ).permitAll()
                 // Actuator 헬스체크 엔드포인트 허용
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                // Swagger UI 허용
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 // API 엔드포인트 허용
                 .requestMatchers("/api/**").permitAll()
                 // 나머지는 인증 필요
