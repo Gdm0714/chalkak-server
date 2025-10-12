@@ -111,6 +111,7 @@ public class PhotoBoothService {
         photoBooth.update(
             requestDto.getName(),
             requestDto.getBrand(),
+            requestDto.getSeries(),
             requestDto.getAddress(),
             requestDto.getRoadAddress(),
             requestDto.getLatitude(),
