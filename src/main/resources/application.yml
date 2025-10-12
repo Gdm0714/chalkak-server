@@ -1,12 +1,7 @@
 spring:
   application:
     name: chalkak-server
-    
-  # DevTools 비활성화
-  devtools:
-    restart:
-      enabled: false
-      
+
   # Jackson JSON 설정
   jackson:
     default-property-inclusion: non_null
@@ -15,69 +10,64 @@ spring:
       write-null-map-values: false
     deserialization:
       fail-on-unknown-properties: false
-      
+
   # MySQL Database Configuration
   datasource:
-    url: jdbc:mysql://localhost:3306/chalkak_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: koh0714!
+    url: ${DB_URL:jdbc:mysql://localhost:3306/chalkak_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      jdbc-url: jdbc:mysql://localhost:3306/chalkak_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       connection-timeout: 30000
       maximum-pool-size: 10
-      
+
   # JPA/Hibernate Configuration
   jpa:
     hibernate:
-      ddl-auto: none
-    show-sql: true
+      ddl-auto: update
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
-    defer-datasource-initialization: true
-    generate-ddl: true
-    
-  # SQL Initialization
-  sql:
-    init:
-      mode: always
-      continue-on-error: true
-      
-  # Cache Configuration - Redis 사용
+
+  # Cache Configuration - Redis
   cache:
     type: redis
     redis:
-      time-to-live: 1800000  # 30분 (기본값)
+      time-to-live: 1800000  # 30분
       cache-null-values: false
-      enable-statistics: true
-      
+
   # Redis Configuration
   redis:
-    host: localhost
-    port: 6379
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
     timeout: 3000ms
     lettuce:
       pool:
         max-active: 8
         max-idle: 8
         min-idle: 0
-        max-wait: -1ms
 
 # Server Configuration
 server:
-  port: 8082
+  port: ${SERVER_PORT:8082}
   address: 0.0.0.0
-  
+
 # Logging
 logging:
   level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.springframework.jdbc.datasource.init: DEBUG
-    org.hibernate.tool.hbm2ddl: DEBUG
-    com.zaxxer.hikari: DEBUG
-    org.springframework.boot.autoconfigure.jdbc: DEBUG
-    com.min.chalkakserver: INFO
     root: INFO
+    com.min.chalkakserver: INFO
+  file:
+    name: /var/log/chalkak/application.log
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
