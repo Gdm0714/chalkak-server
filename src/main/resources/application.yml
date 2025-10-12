@@ -82,5 +82,7 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+    disable-swagger-default-url: true
+    url: /v3/api-docs
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
