@@ -28,6 +28,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 // Actuator 헬스체크 엔드포인트 허용
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                // Swagger UI 허용
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 // API 엔드포인트 허용
                 .requestMatchers("/api/**").permitAll()
                 // 나머지는 인증 필요
