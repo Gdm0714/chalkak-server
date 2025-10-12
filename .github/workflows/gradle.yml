@@ -61,7 +61,7 @@ jobs:
         EOF
 
         echo "배포 완료!"
-
+        
     - name: Cleanup
       if: always()
       run: rm -f private_key.pem
