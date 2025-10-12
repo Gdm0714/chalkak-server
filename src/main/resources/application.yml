@@ -86,5 +86,6 @@ springdoc:
     enabled: true
     operations-sorter: alpha
     tags-sorter: alpha
+    disable-swagger-default-url: true
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
