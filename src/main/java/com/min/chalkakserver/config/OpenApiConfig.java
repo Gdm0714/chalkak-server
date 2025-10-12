@@ -14,6 +14,7 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI openAPI() {
+        System.out.println("########## OpenApiConfig openAPI Bean is being created! ##########");
         return new OpenAPI()
                 .info(new Info()
                         .title("Chalkak API")
