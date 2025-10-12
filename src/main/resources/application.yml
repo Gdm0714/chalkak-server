@@ -84,9 +84,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
-    url: /v3/api-docs
-    disable-swagger-default-url: true
     operations-sorter: alpha
     tags-sorter: alpha
+    config-url: /v3/api-docs/swagger-config
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
