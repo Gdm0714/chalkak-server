@@ -14,6 +14,7 @@ public class PhotoBoothResponseDto {
     private Long id;
     private String name;
     private String brand;
+    private String series;
     private String address;
     private String roadAddress;
     private Double latitude;
@@ -30,6 +31,7 @@ public class PhotoBoothResponseDto {
                 .id(photoBooth.getId())
                 .name(photoBooth.getName())
                 .brand(photoBooth.getBrand())
+                .series(photoBooth.getSeries())
                 .address(photoBooth.getAddress())
                 .roadAddress(photoBooth.getRoadAddress())
                 .latitude(photoBooth.getLatitude())
@@ -48,6 +50,7 @@ public class PhotoBoothResponseDto {
         this.id = photoBooth.getId();
         this.name = photoBooth.getName();
         this.brand = photoBooth.getBrand();
+        this.series = photoBooth.getSeries();
         this.address = photoBooth.getAddress();
         this.roadAddress = photoBooth.getRoadAddress();
         this.latitude = photoBooth.getLatitude();

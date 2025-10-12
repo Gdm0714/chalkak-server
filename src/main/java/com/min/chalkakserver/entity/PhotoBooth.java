@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
     indexes = {
         @Index(name = "idx_location", columnList = "latitude,longitude"),
         @Index(name = "idx_brand", columnList = "brand"),
-        @Index(name = "idx_name", columnList = "name")
+        @Index(name = "idx_name", columnList = "name"),
+        @Index(name = "idx_brand_series", columnList = "brand,series")
     })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,6 +29,9 @@ public class PhotoBooth {
     
     @Column(length = 50)
     private String brand;
+    
+    @Column(length = 50)
+    private String series;
     
     @Column(length = 255)
     private String address;
@@ -71,11 +75,12 @@ public class PhotoBooth {
     }
     
     @Builder
-    public PhotoBooth(String name, String brand, String address, String roadAddress, 
+    public PhotoBooth(String name, String brand, String series, String address, String roadAddress, 
                      Double latitude, Double longitude, String operatingHours, 
                      String phoneNumber, String description, String priceInfo) {
         this.name = name;
         this.brand = brand;
+        this.series = series;
         this.address = address;
         this.roadAddress = roadAddress;
         this.latitude = latitude;
@@ -86,11 +91,12 @@ public class PhotoBooth {
         this.priceInfo = priceInfo;
     }
     
-    public void update(String name, String brand, String address, String roadAddress,
+    public void update(String name, String brand, String series, String address, String roadAddress,
                       Double latitude, Double longitude, String operatingHours,
                       String phoneNumber, String description, String priceInfo) {
         this.name = name;
         this.brand = brand;
+        this.series = series;
         this.address = address;
         this.roadAddress = roadAddress;
         this.latitude = latitude;

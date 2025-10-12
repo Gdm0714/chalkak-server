@@ -162,6 +162,28 @@ public class PhotoBoothService {
                 .map(PhotoBoothResponseDto::from)
                 .collect(Collectors.toList());
     }
+
+    // 브랜드 + 시리즈로 검색
+    @Transactional(readOnly = true)
+    @Cacheable(value = "brandSeriesPhotoBooths", key = "#brand + '_' + #series", unless = "#result == null || #result.isEmpty()")
+    public List<PhotoBoothResponseDto> getPhotoBoothsByBrandAndSeries(String brand, String series) {
+        log.info("브랜드 + 시리즈로 검색 - 브랜드: {}, 시리즈: {} - DB에서 데이터 조회", brand, series);
+        return photoBoothRepository.findByBrandContainingIgnoreCaseAndSeriesContainingIgnoreCase(brand, series)
+                .stream()
+                .map(PhotoBoothResponseDto::from)
+                .collect(Collectors.toList());
+    }
+    
+    // 시리즈로만 검색
+    @Transactional(readOnly = true)
+    @Cacheable(value = "seriesPhotoBooths", key = "#series", unless = "#result == null || #result.isEmpty()")
+    public List<PhotoBoothResponseDto> getPhotoBoothsBySeries(String series) {
+        log.info("시리즈로 검색 - 시리즈: {} - DB에서 데이터 조회", series);
+        return photoBoothRepository.findBySeriesContainingIgnoreCase(series)
+                .stream()
+                .map(PhotoBoothResponseDto::from)
+                .collect(Collectors.toList());
+    }
     
     // 위치 유효성 검증 메서드
     private void validateLocation(double latitude, double longitude, double radius) {
