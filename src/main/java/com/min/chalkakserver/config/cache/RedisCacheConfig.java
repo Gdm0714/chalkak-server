@@ -1,4 +1,7 @@
 package com.min.chalkakserver.config.cache;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurer;
@@ -43,14 +46,14 @@ public class RedisCacheConfig implements CachingConfigurer {
         
         // 일반적인 key:value의 경우 시리얼라이저
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setValueSerializer(genericJackson2JsonRedisSerializer());
         
         // Hash를 사용할 경우 시리얼라이저
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setHashValueSerializer(genericJackson2JsonRedisSerializer());
         
         // 모든 경우
-        redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setDefaultSerializer(genericJackson2JsonRedisSerializer());
         
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
@@ -62,7 +65,7 @@ public class RedisCacheConfig implements CachingConfigurer {
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(30)) // 기본 TTL 30분
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(genericJackson2JsonRedisSerializer()));
 
         // 캐시별 개별 설정
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
@@ -90,6 +93,15 @@ public class RedisCacheConfig implements CachingConfigurer {
 
     // 주의: 글로벌 ObjectMapper Bean을 등록하지 않습니다.
     // Redis 직렬화는 GenericJackson2JsonRedisSerializer의 내부 ObjectMapper를 사용합니다.
+
+    // Redis에서 Java Time(LocalDateTime 등) 직렬화 지원을 위해 커스텀 ObjectMapper 사용
+    @Bean
+    public GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return new GenericJackson2JsonRedisSerializer(mapper);
+    }
 
     @Bean
     @Override
