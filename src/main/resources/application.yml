@@ -77,8 +77,6 @@ logging:
   level:
     root: INFO
     com.min.chalkakserver: INFO
-  file:
-    name: /var/log/chalkak/application.log
 
 # Actuator
 management:
