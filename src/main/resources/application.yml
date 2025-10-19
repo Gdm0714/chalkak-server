@@ -17,9 +17,6 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
-app:
-  admin-email: ${ADMIN_EMAIL:admin@chalkak.co.kr}
-
   # Jackson JSON 설정
   jackson:
     default-property-inclusion: non_null
@@ -66,6 +63,9 @@ app:
         max-active: 8
         max-idle: 8
         min-idle: 0
+
+app:
+  admin-email: ${ADMIN_EMAIL:admin@chalkak.co.kr}
 
 # Server Configuration
 server:
