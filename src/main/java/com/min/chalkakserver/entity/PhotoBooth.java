@@ -9,7 +9,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "photo_booths", 
+@Table(name = "photo_booths",
     indexes = {
         @Index(name = "idx_location", columnList = "latitude,longitude"),
         @Index(name = "idx_brand", columnList = "brand"),

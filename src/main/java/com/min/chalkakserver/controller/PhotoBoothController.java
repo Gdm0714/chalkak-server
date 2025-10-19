@@ -1,11 +1,16 @@
 package com.min.chalkakserver.controller;
 
+import com.min.chalkakserver.dto.PhotoBoothReportDto;
 import com.min.chalkakserver.dto.PhotoBoothRequestDto;
 import com.min.chalkakserver.dto.PhotoBoothResponseDto;
+import com.min.chalkakserver.service.EmailService;
 import com.min.chalkakserver.service.PhotoBoothService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +21,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/photo-booths")
+@RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 @Validated
 public class PhotoBoothController {
     
-    @Autowired
-    private PhotoBoothService photoBoothService;
+    private final PhotoBoothService photoBoothService;
+
+    private final EmailService emailService;
     
     @GetMapping
     public ResponseEntity<List<PhotoBoothResponseDto>> getAllPhotoBooths() {
@@ -74,5 +81,13 @@ public class PhotoBoothController {
             @PathVariable String series) {
         List<PhotoBoothResponseDto> seriesResults = photoBoothService.getPhotoBoothsBySeries(series);
         return ResponseEntity.ok(seriesResults);
+    }
+
+    @PostMapping("/report")
+    @Operation(summary = "네컷사진관 제보", description = "사용자가 새로운 네컷사진관 정보를 관리자에게 제보합니다")
+    public ResponseEntity<Map<String, String>> reportPhotoBooth(
+        @Valid @RequestBody PhotoBoothReportDto reportDto) {
+        emailService.sendPhotoBoothReport(reportDto);
+        return ResponseEntity.ok(Map.of("message", "제보가 접수되었습니다. 감사합니다!"));
     }
 }
