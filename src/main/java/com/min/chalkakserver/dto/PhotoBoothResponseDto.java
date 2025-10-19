@@ -19,8 +19,6 @@ public class PhotoBoothResponseDto {
     private String roadAddress;
     private Double latitude;
     private Double longitude;
-    private String operatingHours;
-    private String phoneNumber;
     private String description;
     private String priceInfo;
     private LocalDateTime createdAt;
@@ -36,8 +34,6 @@ public class PhotoBoothResponseDto {
                 .roadAddress(photoBooth.getRoadAddress())
                 .latitude(photoBooth.getLatitude())
                 .longitude(photoBooth.getLongitude())
-                .operatingHours(photoBooth.getOperatingHours())
-                .phoneNumber(photoBooth.getPhoneNumber())
                 .description(photoBooth.getDescription())
                 .priceInfo(photoBooth.getPriceInfo())
                 .createdAt(photoBooth.getCreatedAt())
@@ -55,8 +51,6 @@ public class PhotoBoothResponseDto {
         this.roadAddress = photoBooth.getRoadAddress();
         this.latitude = photoBooth.getLatitude();
         this.longitude = photoBooth.getLongitude();
-        this.operatingHours = photoBooth.getOperatingHours();
-        this.phoneNumber = photoBooth.getPhoneNumber();
         this.description = photoBooth.getDescription();
         this.priceInfo = photoBooth.getPriceInfo();
         this.createdAt = photoBooth.getCreatedAt();
