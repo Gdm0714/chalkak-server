@@ -48,7 +48,7 @@ public class CacheWarmupRunner implements ApplicationRunner {
             }
             
             // 3. 주요 브랜드별 캐싱
-            List<String> majorBrands = Arrays.asList("인생네컷", "포토이즘", "하루필름", "포토그레이", "모노맨션");
+            List<String> majorBrands = Arrays.asList("인생네컷", "포토이즘", "하루필름", "포토그레이", "모노맨션", "포토시그니처", "모드빈티크", "RGB 포토스튜디오", "Plan B Studio", "Photomatic");
             for (String brand : majorBrands) {
                 photoBoothService.getPhotoBoothsByBrand(brand);
                 log.info("{} 브랜드 네컷사진관 캐싱 완료", brand);
