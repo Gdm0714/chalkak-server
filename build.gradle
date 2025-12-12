@@ -36,6 +36,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     
+    // Rate Limiting
+    implementation 'com.bucket4j:bucket4j-core:8.10.1'
+    
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
