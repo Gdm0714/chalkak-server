@@ -1,5 +1,6 @@
 package com.min.chalkakserver.service;
 
+import com.min.chalkakserver.dto.PagedResponseDto;
 import com.min.chalkakserver.dto.PhotoBoothRequestDto;
 import com.min.chalkakserver.dto.PhotoBoothResponseDto;
 import com.min.chalkakserver.entity.PhotoBooth;
@@ -11,6 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +39,18 @@ public class PhotoBoothService {
                 .stream()
                 .map(PhotoBoothResponseDto::from)
                 .collect(Collectors.toList());
+    }
+    
+    // 모든 네컷사진관 조회 (페이지네이션)
+    @Transactional(readOnly = true)
+    public PagedResponseDto<PhotoBoothResponseDto> getAllPhotoBoothsPaged(int page, int size) {
+        log.info("모든 네컷사진관 조회 (페이지: {}, 사이즈: {}) - DB에서 데이터 조회", page, size);
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<PhotoBooth> photoBoothPage = photoBoothRepository.findAll(pageable);
+        
+        Page<PhotoBoothResponseDto> dtoPage = photoBoothPage.map(PhotoBoothResponseDto::from);
+        return PagedResponseDto.from(dtoPage);
     }
     
     // ID로 네컷사진관 조회
@@ -153,6 +170,19 @@ public class PhotoBoothService {
                 .collect(Collectors.toList());
     }
     
+    // 키워드로 검색 (페이지네이션)
+    @Transactional(readOnly = true)
+    public PagedResponseDto<PhotoBoothResponseDto> searchPhotoBoothsPaged(String keyword, int page, int size) {
+        log.info("키워드로 검색 (페이지: {}, 사이즈: {}) - 키워드: {} - DB에서 데이터 조회", page, size, keyword);
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<PhotoBooth> photoBoothPage = photoBoothRepository
+                .findByNameContainingIgnoreCaseOrAddressContainingIgnoreCase(keyword, keyword, pageable);
+        
+        Page<PhotoBoothResponseDto> dtoPage = photoBoothPage.map(PhotoBoothResponseDto::from);
+        return PagedResponseDto.from(dtoPage);
+    }
+    
     // 브랜드로 검색
     @Transactional(readOnly = true)
     @Cacheable(value = "brandPhotoBooths", key = "#brand", unless = "#result == null || #result.isEmpty()")
@@ -162,6 +192,18 @@ public class PhotoBoothService {
                 .stream()
                 .map(PhotoBoothResponseDto::from)
                 .collect(Collectors.toList());
+    }
+    
+    // 브랜드로 검색 (페이지네이션)
+    @Transactional(readOnly = true)
+    public PagedResponseDto<PhotoBoothResponseDto> getPhotoBoothsByBrandPaged(String brand, int page, int size) {
+        log.info("브랜드로 검색 (페이지: {}, 사이즈: {}) - 브랜드: {} - DB에서 데이터 조회", page, size, brand);
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<PhotoBooth> photoBoothPage = photoBoothRepository.findByBrandContainingIgnoreCase(brand, pageable);
+        
+        Page<PhotoBoothResponseDto> dtoPage = photoBoothPage.map(PhotoBoothResponseDto::from);
+        return PagedResponseDto.from(dtoPage);
     }
 
     // 브랜드 + 시리즈로 검색
