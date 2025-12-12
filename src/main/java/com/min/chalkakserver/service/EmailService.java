@@ -10,6 +10,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
@@ -32,10 +36,41 @@ public class EmailService {
             helper.setText(buildReportEmailContent(reportDto), true);
 
             mailSender.send(message);
+            log.info("제보 이메일 전송 성공: {}", escapeForLog(reportDto.getName()));
         } catch (MessagingException e) {
-            log.error("이메일 전송 실패", e);
-            throw new RuntimeException("이메일 전송에 실패했습니다.", e);
+            // @Async 메서드에서는 예외를 던져도 호출자에게 전달되지 않으므로 로깅만 수행
+            log.error("이메일 전송 실패: {}", escapeForLog(reportDto.getName()), e);
         }
+    }
+
+    /**
+     * HTML 이스케이프 처리 - XSS 방지
+     */
+    private String escapeHtml(String input) {
+        if (input == null) {
+            return "";
+        }
+        return HtmlUtils.htmlEscape(input);
+    }
+
+    /**
+     * URL 인코딩 처리
+     */
+    private String encodeUrl(String input) {
+        if (input == null) {
+            return "";
+        }
+        return URLEncoder.encode(input, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 로그용 문자열 이스케이프 (로그 인젝션 방지)
+     */
+    private String escapeForLog(String input) {
+        if (input == null) {
+            return "";
+        }
+        return input.replaceAll("[\n\r\t]", "_");
     }
 
     private String buildReportEmailContent(PhotoBoothReportDto reportDto) {
@@ -47,20 +82,20 @@ public class EmailService {
         sb.append("<h3>기본 정보</h3>");
         sb.append("<table border='1' cellpadding='10' style='border-collapse: collapse;'>");
         sb.append("<tr><th>항목</th><th>내용</th></tr>");
-        sb.append("<tr><td>이름</td><td>").append(reportDto.getName()).append("</td></tr>");
+        sb.append("<tr><td>이름</td><td>").append(escapeHtml(reportDto.getName())).append("</td></tr>");
 
         if (reportDto.getBrand() != null) {
-            sb.append("<tr><td>브랜드</td><td>").append(reportDto.getBrand()).append("</td></tr>");
+            sb.append("<tr><td>브랜드</td><td>").append(escapeHtml(reportDto.getBrand())).append("</td></tr>");
         }
 
         if (reportDto.getSeries() != null) {
-            sb.append("<tr><td>시리즈</td><td>").append(reportDto.getSeries()).append("</td></tr>");
+            sb.append("<tr><td>시리즈</td><td>").append(escapeHtml(reportDto.getSeries())).append("</td></tr>");
         }
 
-        sb.append("<tr><td>주소</td><td>").append(reportDto.getAddress()).append("</td></tr>");
+        sb.append("<tr><td>주소</td><td>").append(escapeHtml(reportDto.getAddress())).append("</td></tr>");
 
         if (reportDto.getRoadAddress() != null) {
-            sb.append("<tr><td>도로명 주소</td><td>").append(reportDto.getRoadAddress())
+            sb.append("<tr><td>도로명 주소</td><td>").append(escapeHtml(reportDto.getRoadAddress()))
                 .append("</td></tr>");
         }
 
@@ -68,12 +103,12 @@ public class EmailService {
         sb.append("<tr><td>경도</td><td>").append(reportDto.getLongitude()).append("</td></tr>");
 
         if (reportDto.getPriceInfo() != null) {
-            sb.append("<tr><td>가격 정보</td><td>").append(reportDto.getPriceInfo())
+            sb.append("<tr><td>가격 정보</td><td>").append(escapeHtml(reportDto.getPriceInfo()))
                 .append("</td></tr>");
         }
 
         if (reportDto.getDescription() != null) {
-            sb.append("<tr><td>설명</td><td>").append(reportDto.getDescription())
+            sb.append("<tr><td>설명</td><td>").append(escapeHtml(reportDto.getDescription()))
                 .append("</td></tr>");
         }
 
@@ -85,22 +120,22 @@ public class EmailService {
             sb.append("<tr><th>항목</th><th>내용</th></tr>");
 
             if (reportDto.getReporterName() != null) {
-                sb.append("<tr><td>이름</td><td>").append(reportDto.getReporterName())
+                sb.append("<tr><td>이름</td><td>").append(escapeHtml(reportDto.getReporterName()))
                     .append("</td></tr>");
             }
 
             if (reportDto.getReporterEmail() != null) {
-                sb.append("<tr><td>이메일</td><td>").append(reportDto.getReporterEmail())
+                sb.append("<tr><td>이메일</td><td>").append(escapeHtml(reportDto.getReporterEmail()))
                     .append("</td></tr>");
             }
 
             sb.append("</table>");
         }
 
-        // 지도 링크
+        // 지도 링크 (URL 인코딩 적용)
         sb.append("<h3>지도 확인</h3>");
         sb.append("<p><a href='https://map.naver.com/v5/search/")
-            .append(reportDto.getAddress())
+            .append(encodeUrl(reportDto.getAddress()))
             .append("'>네이버 지도에서 보기</a></p>");
         sb.append("<p><a href='https://www.google.com/maps/search/?api=1&query=")
             .append(reportDto.getLatitude()).append(",").append(reportDto.getLongitude())
