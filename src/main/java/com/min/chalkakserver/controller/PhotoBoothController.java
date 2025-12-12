@@ -1,18 +1,18 @@
 package com.min.chalkakserver.controller;
 
+import com.min.chalkakserver.dto.PagedResponseDto;
 import com.min.chalkakserver.dto.PhotoBoothReportDto;
 import com.min.chalkakserver.dto.PhotoBoothRequestDto;
 import com.min.chalkakserver.dto.PhotoBoothResponseDto;
 import com.min.chalkakserver.service.EmailService;
 import com.min.chalkakserver.service.PhotoBoothService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +31,20 @@ public class PhotoBoothController {
     private final EmailService emailService;
     
     @GetMapping
+    @Operation(summary = "모든 네컷사진관 조회", description = "전체 네컷사진관 목록을 조회합니다")
     public ResponseEntity<List<PhotoBoothResponseDto>> getAllPhotoBooths() {
         List<PhotoBoothResponseDto> photoBooths = photoBoothService.getAllPhotoBooths();
+        return ResponseEntity.ok(photoBooths);
+    }
+    
+    @GetMapping("/paged")
+    @Operation(summary = "모든 네컷사진관 조회 (페이지네이션)", description = "페이지네이션을 적용하여 네컷사진관 목록을 조회합니다")
+    public ResponseEntity<PagedResponseDto<PhotoBoothResponseDto>> getAllPhotoBoothsPaged(
+            @Parameter(description = "페이지 번호 (0부터 시작)") 
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @Parameter(description = "페이지 크기 (최대 100)") 
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+        PagedResponseDto<PhotoBoothResponseDto> photoBooths = photoBoothService.getAllPhotoBoothsPaged(page, size);
         return ResponseEntity.ok(photoBooths);
     }
     
@@ -55,16 +67,42 @@ public class PhotoBoothController {
     }
 
     @GetMapping("/search")
+    @Operation(summary = "키워드로 검색", description = "이름 또는 주소에 키워드가 포함된 네컷사진관을 검색합니다")
     public ResponseEntity<List<PhotoBoothResponseDto>> searchPhotoBooths(
             @RequestParam String keyword) {
         List<PhotoBoothResponseDto> searchResults = photoBoothService.searchPhotoBooths(keyword);
         return ResponseEntity.ok(searchResults);
     }
     
+    @GetMapping("/search/paged")
+    @Operation(summary = "키워드로 검색 (페이지네이션)", description = "페이지네이션을 적용하여 키워드 검색 결과를 조회합니다")
+    public ResponseEntity<PagedResponseDto<PhotoBoothResponseDto>> searchPhotoBoothsPaged(
+            @Parameter(description = "검색 키워드") @RequestParam String keyword,
+            @Parameter(description = "페이지 번호 (0부터 시작)") 
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @Parameter(description = "페이지 크기 (최대 100)") 
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+        PagedResponseDto<PhotoBoothResponseDto> searchResults = photoBoothService.searchPhotoBoothsPaged(keyword, page, size);
+        return ResponseEntity.ok(searchResults);
+    }
+    
     @GetMapping("/brand/{brand}")
+    @Operation(summary = "브랜드별 조회", description = "특정 브랜드의 네컷사진관을 조회합니다")
     public ResponseEntity<List<PhotoBoothResponseDto>> getPhotoBoothsByBrand(
             @PathVariable String brand) {
         List<PhotoBoothResponseDto> brandResults = photoBoothService.getPhotoBoothsByBrand(brand);
+        return ResponseEntity.ok(brandResults);
+    }
+    
+    @GetMapping("/brand/{brand}/paged")
+    @Operation(summary = "브랜드별 조회 (페이지네이션)", description = "페이지네이션을 적용하여 특정 브랜드의 네컷사진관을 조회합니다")
+    public ResponseEntity<PagedResponseDto<PhotoBoothResponseDto>> getPhotoBoothsByBrandPaged(
+            @PathVariable String brand,
+            @Parameter(description = "페이지 번호 (0부터 시작)") 
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @Parameter(description = "페이지 크기 (최대 100)") 
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+        PagedResponseDto<PhotoBoothResponseDto> brandResults = photoBoothService.getPhotoBoothsByBrandPaged(brand, page, size);
         return ResponseEntity.ok(brandResults);
     }
 
