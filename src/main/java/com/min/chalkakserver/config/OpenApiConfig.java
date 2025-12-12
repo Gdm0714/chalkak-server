@@ -4,17 +4,19 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.servers.Server;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
 @Configuration
+@Slf4j
 public class OpenApiConfig {
 
     @Bean
     public OpenAPI openAPI() {
-        System.out.println("########## OpenApiConfig openAPI Bean is being created! ##########");
+        log.info("OpenApiConfig openAPI Bean is being created");
         return new OpenAPI()
                 .info(new Info()
                         .title("Chalkak API")
