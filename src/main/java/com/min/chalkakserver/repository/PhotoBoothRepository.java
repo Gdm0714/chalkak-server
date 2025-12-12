@@ -1,6 +1,8 @@
 package com.min.chalkakserver.repository;
 
 import com.min.chalkakserver.entity.PhotoBooth;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,9 @@ public interface PhotoBoothRepository extends JpaRepository<PhotoBooth, Long> {
     
     // 브랜드로 검색
     List<PhotoBooth> findByBrandContainingIgnoreCase(String brand);
+    
+    // 브랜드로 검색 (페이지네이션)
+    Page<PhotoBooth> findByBrandContainingIgnoreCase(String brand, Pageable pageable);
 
     // 브랜드 + 시리즈로 검색
     List<PhotoBooth> findByBrandAndSeries(String brand, String series);
@@ -22,9 +27,15 @@ public interface PhotoBoothRepository extends JpaRepository<PhotoBooth, Long> {
 
     // 시리즈로만 검색
     List<PhotoBooth> findBySeriesContainingIgnoreCase(String series);
+    
+    // 시리즈로 검색 (페이지네이션)
+    Page<PhotoBooth> findBySeriesContainingIgnoreCase(String series, Pageable pageable);
 
     // 이름 또는 주소로 검색
     List<PhotoBooth> findByNameContainingIgnoreCaseOrAddressContainingIgnoreCase(String name, String address);
+    
+    // 이름 또는 주소로 검색 (페이지네이션)
+    Page<PhotoBooth> findByNameContainingIgnoreCaseOrAddressContainingIgnoreCase(String name, String address, Pageable pageable);
     
     // Spatial Index를 활용한 근처 네컷사진관 검색
     // Bounding Box를 이용한 1차 필터링 후 정확한 거리 계산
