@@ -39,8 +39,11 @@ spring:
   # JPA/Hibernate Configuration
   jpa:
     hibernate:
-      ddl-auto: update
+      # 주의: update는 개발 환경에서만 사용. 프로덕션은 application-prod.yml의 validate 사용
+      ddl-auto: ${DDL_AUTO:validate}
     show-sql: false
+    # OSIV 비활성화 - 지연 로딩으로 인한 N+1 문제 방지
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
@@ -66,6 +69,9 @@ spring:
 
 app:
   admin-email: ${ADMIN_EMAIL:admin@chalkak.co.kr}
+  # 관리자 API 키 (캐시 관리 등 민감한 작업에 필요)
+  # 환경변수로 반드시 설정해야 함 (설정하지 않으면 관리 API 접근 불가)
+  admin-api-key: ${ADMIN_API_KEY:}
 
 # Server Configuration
 server:
