@@ -73,6 +73,11 @@ app:
   # 환경변수로 반드시 설정해야 함 (설정하지 않으면 관리 API 접근 불가)
   admin-api-key: ${ADMIN_API_KEY:}
 
+# Rate Limiting 설정
+rate-limit:
+  requests-per-minute: ${RATE_LIMIT_PER_MINUTE:60}
+  requests-per-second: ${RATE_LIMIT_PER_SECOND:10}
+
 # Server Configuration
 server:
   port: ${SERVER_PORT:8082}
