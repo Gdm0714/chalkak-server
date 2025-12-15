@@ -76,6 +76,35 @@ public class RateLimitConfig {
     }
 
     /**
+     * 인증 API용 버킷 (브루트포스 공격 방지)
+     * - 분당 10개 로그인 시도만 허용
+     * - 시간당 30개 로그인 시도만 허용
+     */
+    public Bucket resolveAuthBucket(String ipAddress) {
+        String key = "auth_" + ipAddress;
+        return buckets.computeIfAbsent(key, k -> createAuthBucket());
+    }
+
+    private Bucket createAuthBucket() {
+        // 분당 10개 요청
+        Bandwidth perMinuteLimit = Bandwidth.classic(
+                10,
+                Refill.greedy(10, Duration.ofMinutes(1))
+        );
+
+        // 시간당 30개 요청
+        Bandwidth perHourLimit = Bandwidth.classic(
+                30,
+                Refill.greedy(30, Duration.ofHours(1))
+        );
+
+        return Bucket.builder()
+                .addLimit(perMinuteLimit)
+                .addLimit(perHourLimit)
+                .build();
+    }
+
+    /**
      * 버킷 캐시 정리 (메모리 관리)
      * 주기적으로 호출하여 오래된 버킷 제거
      */
