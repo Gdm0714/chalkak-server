@@ -101,6 +101,71 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * 인증 관련 예외
+     */
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<ErrorResponse> handleAuthException(
+            AuthException ex, HttpServletRequest request) {
+        
+        log.error("Authentication error: {}", ex.getMessage());
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.UNAUTHORIZED.value(),
+            "Unauthorized",
+            ex.getMessage(),
+            request.getRequestURI()
+        );
+        
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+    
+    /**
+     * 리뷰를 찾을 수 없는 경우
+     */
+    @ExceptionHandler(ReviewNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleReviewNotFoundException(
+            ReviewNotFoundException ex, HttpServletRequest request) {
+        
+        log.error("Review not found: {}", ex.getMessage());
+        
+        Map<String, Object> details = new HashMap<>();
+        details.put("reviewId", ex.getReviewId());
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+        
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+    
+    /**
+     * 중복 리뷰 작성 시도
+     */
+    @ExceptionHandler(DuplicateReviewException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateReviewException(
+            DuplicateReviewException ex, HttpServletRequest request) {
+        
+        log.error("Duplicate review: {}", ex.getMessage());
+        
+        Map<String, Object> details = new HashMap<>();
+        details.put("photoBoothId", ex.getPhotoBoothId());
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.CONFLICT.value(),
+            "Conflict",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+        
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+    
+    /**
      * Validation 실패
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
