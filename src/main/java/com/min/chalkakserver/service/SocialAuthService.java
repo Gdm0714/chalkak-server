@@ -18,6 +18,8 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -34,6 +36,11 @@ public class SocialAuthService {
     private static final String NAVER_USER_INFO_URL = "https://openapi.naver.com/v1/nid/me";
     private static final String APPLE_PUBLIC_KEYS_URL = "https://appleid.apple.com/auth/keys";
     private static final String APPLE_ISSUER = "https://appleid.apple.com";
+
+    // Apple 공개키 캐시 (kid -> PublicKey)
+    private final Map<String, PublicKey> applePublicKeyCache = new ConcurrentHashMap<>();
+    private volatile long appleKeysCacheExpiry = 0;
+    private static final long APPLE_KEYS_CACHE_TTL = 24 * 60 * 60 * 1000; // 24시간
 
     public SocialUserInfo getSocialUserInfo(String provider, String accessToken) {
         return switch (provider.toLowerCase()) {
@@ -179,38 +186,64 @@ public class SocialAuthService {
     }
 
     /**
-     * Apple 공개키 조회
+     * Apple 공개키 조회 (캐싱 적용)
      */
     private PublicKey getApplePublicKey(String kid) {
+        // 캐시에서 조회
+        if (System.currentTimeMillis() < appleKeysCacheExpiry) {
+            PublicKey cachedKey = applePublicKeyCache.get(kid);
+            if (cachedKey != null) {
+                log.debug("Apple public key cache hit for kid: {}", kid);
+                return cachedKey;
+            }
+        }
+
+        // 캐시 미스 또는 만료 - Apple 서버에서 조회
         try {
+            log.info("Fetching Apple public keys from server");
             ResponseEntity<String> response = restTemplate.getForEntity(
                 APPLE_PUBLIC_KEYS_URL, String.class);
             
             JsonNode keys = objectMapper.readTree(response.getBody()).get("keys");
             
+            // 모든 키를 캐시에 저장
+            applePublicKeyCache.clear();
             for (JsonNode key : keys) {
-                if (key.get("kid").asText().equals(kid)) {
-                    String n = key.get("n").asText();
-                    String e = key.get("e").asText();
-                    
-                    byte[] nBytes = Base64.getUrlDecoder().decode(n);
-                    byte[] eBytes = Base64.getUrlDecoder().decode(e);
-                    
-                    BigInteger modulus = new BigInteger(1, nBytes);
-                    BigInteger exponent = new BigInteger(1, eBytes);
-                    
-                    RSAPublicKeySpec spec = new RSAPublicKeySpec(modulus, exponent);
-                    KeyFactory factory = KeyFactory.getInstance("RSA");
-                    return factory.generatePublic(spec);
-                }
+                String keyId = key.get("kid").asText();
+                PublicKey publicKey = parseApplePublicKey(key);
+                applePublicKeyCache.put(keyId, publicKey);
             }
+            appleKeysCacheExpiry = System.currentTimeMillis() + APPLE_KEYS_CACHE_TTL;
             
-            throw new AuthException("Apple public key not found for kid: " + kid);
+            PublicKey result = applePublicKeyCache.get(kid);
+            if (result == null) {
+                throw new AuthException("Apple public key not found for kid: " + kid);
+            }
+            return result;
+            
         } catch (AuthException e) {
             throw e;
         } catch (Exception e) {
             log.error("Failed to get Apple public key: {}", e.getMessage());
             throw new AuthException("Failed to get Apple public key");
         }
+    }
+
+    /**
+     * Apple 공개키 JSON을 PublicKey 객체로 변환
+     */
+    private PublicKey parseApplePublicKey(JsonNode key) throws Exception {
+        String n = key.get("n").asText();
+        String e = key.get("e").asText();
+        
+        byte[] nBytes = Base64.getUrlDecoder().decode(n);
+        byte[] eBytes = Base64.getUrlDecoder().decode(e);
+        
+        BigInteger modulus = new BigInteger(1, nBytes);
+        BigInteger exponent = new BigInteger(1, eBytes);
+        
+        RSAPublicKeySpec spec = new RSAPublicKeySpec(modulus, exponent);
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        return factory.generatePublic(spec);
     }
 }
