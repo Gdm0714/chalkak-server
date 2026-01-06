@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -52,7 +53,7 @@ public class SecurityConfig {
                 // Actuator 헬스체크 엔드포인트 허용
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 // 인증 관련 엔드포인트 허용
-                .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/login/email", "/api/auth/register", "/api/auth/refresh", "/api/auth/logout").permitAll()
                 // 포토부스 조회 API는 인증 없이 허용 (GET만)
                 .requestMatchers(HttpMethod.GET, "/api/photo-booths/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/photo-booths/report").permitAll()
