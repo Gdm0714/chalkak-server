@@ -29,8 +29,8 @@ spring:
   # MySQL Database Configuration
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/chalkak_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:password}
+    username: ${DB_USERNAME:chalkak}
+    password: ${DB_PASSWORD:chalkak123}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-timeout: 30000
@@ -77,8 +77,8 @@ app:
 # JWT 설정
 jwt:
   # 최소 256비트(32바이트) 이상의 시크릿 키 필요 (HS256 알고리즘)
-  # 반드시 환경변수로 설정해야 함 (기본값 없음 - 보안상 필수)
-  secret: ${JWT_SECRET}
+  # 프로덕션에서는 반드시 환경변수로 설정해야 함
+  secret: ${JWT_SECRET:chalkak-dev-secret-key-minimum-32-characters-long!!}
   access-token-validity: ${JWT_ACCESS_TOKEN_VALIDITY:3600000}     # 1시간 (밀리초)
   refresh-token-validity: ${JWT_REFRESH_TOKEN_VALIDITY:1209600000}  # 14일 (밀리초)
 
