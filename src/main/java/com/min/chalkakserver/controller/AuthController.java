@@ -30,6 +30,22 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "이메일 회원가입", description = "이메일과 비밀번호로 회원가입")
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponseDto> registerWithEmail(
+            @Valid @RequestBody EmailRegisterRequestDto request) {
+        AuthResponseDto response = authService.registerWithEmail(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "이메일 로그인", description = "이메일과 비밀번호로 로그인")
+    @PostMapping("/login/email")
+    public ResponseEntity<AuthResponseDto> loginWithEmail(
+            @Valid @RequestBody EmailLoginRequestDto request) {
+        AuthResponseDto response = authService.loginWithEmail(request);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "토큰 갱신", description = "Refresh Token으로 Access Token 재발급")
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponseDto> refreshToken(
@@ -71,5 +87,15 @@ public class AuthController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         authService.deleteAccount(userDetails.getId());
         return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다."));
+    }
+
+    @Operation(summary = "프로필 수정", description = "닉네임 등 프로필 정보 수정")
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/profile")
+    public ResponseEntity<UserResponseDto> updateProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody ProfileUpdateRequestDto request) {
+        UserResponseDto response = authService.updateProfile(userDetails.getId(), request);
+        return ResponseEntity.ok(response);
     }
 }
