@@ -17,6 +17,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     Optional<User> findByEmail(String email);
     
+    // 이메일 회원가입 시 중복 체크용
+    Optional<User> findByEmailAndProvider(String email, AuthProvider provider);
+    
+    boolean existsByEmail(String email);
+    
     boolean existsByProviderAndProviderId(AuthProvider provider, String providerId);
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt >= :dateTime")
