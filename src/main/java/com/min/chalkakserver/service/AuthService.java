@@ -11,6 +11,7 @@ import com.min.chalkakserver.security.CustomUserDetails;
 import com.min.chalkakserver.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final SocialAuthService socialAuthService;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 소셜 로그인 처리
@@ -195,6 +197,117 @@ public class AuthService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException("User not found"));
         return UserResponseDto.from(user);
+    }
+
+    /**
+     * 이메일 회원가입
+     */
+    @Transactional
+    public AuthResponseDto registerWithEmail(EmailRegisterRequestDto request) {
+        // 필수 약관 동의 확인
+        if (!Boolean.TRUE.equals(request.getTermsAgreed()) || 
+            !Boolean.TRUE.equals(request.getPrivacyAgreed())) {
+            throw new AuthException("필수 약관에 동의해주세요");
+        }
+
+        // 이메일 중복 체크
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AuthException("이미 사용 중인 이메일입니다", "CONFLICT");
+        }
+
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        // 사용자 생성
+        User newUser = User.builder()
+            .email(request.getEmail())
+            .password(encodedPassword)
+            .nickname(extractNicknameFromEmail(request.getEmail()))
+            .provider(AuthProvider.EMAIL)
+            .providerId(request.getEmail())  // 이메일 로그인의 경우 이메일을 providerId로 사용
+            .role(User.Role.USER)
+            .termsAgreed(request.getTermsAgreed())
+            .privacyAgreed(request.getPrivacyAgreed())
+            .marketingAgreed(request.getMarketingAgreed())
+            .build();
+
+        User savedUser = userRepository.save(newUser);
+        log.info("New email user registered: userId={}, email={}", savedUser.getId(), savedUser.getEmail());
+
+        // JWT 토큰 생성
+        String accessToken = jwtTokenProvider.createAccessToken(savedUser);
+        String refreshToken = jwtTokenProvider.createRefreshToken(savedUser);
+
+        // Refresh Token 저장
+        saveRefreshToken(savedUser, refreshToken, request.getDeviceInfo());
+
+        return AuthResponseDto.builder()
+            .accessToken(accessToken)
+            .refreshToken(refreshToken)
+            .tokenType("Bearer")
+            .expiresIn(jwtTokenProvider.getAccessTokenValidity() / 1000)
+            .user(UserResponseDto.from(savedUser))
+            .build();
+    }
+
+    /**
+     * 이메일 로그인
+     */
+    @Transactional
+    public AuthResponseDto loginWithEmail(EmailLoginRequestDto request) {
+        // 이메일로 사용자 조회
+        User user = userRepository.findByEmailAndProvider(request.getEmail(), AuthProvider.EMAIL)
+            .orElseThrow(() -> new AuthException("이메일 또는 비밀번호가 올바르지 않습니다", "UNAUTHORIZED"));
+
+        // 비밀번호 확인
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new AuthException("이메일 또는 비밀번호가 올바르지 않습니다", "UNAUTHORIZED");
+        }
+
+        // 마지막 로그인 시간 업데이트
+        user.updateLastLogin();
+
+        // JWT 토큰 생성
+        String accessToken = jwtTokenProvider.createAccessToken(user);
+        String refreshToken = jwtTokenProvider.createRefreshToken(user);
+
+        // Refresh Token 저장
+        saveRefreshToken(user, refreshToken, request.getDeviceInfo());
+
+        log.info("Email user logged in: userId={}", user.getId());
+
+        return AuthResponseDto.builder()
+            .accessToken(accessToken)
+            .refreshToken(refreshToken)
+            .tokenType("Bearer")
+            .expiresIn(jwtTokenProvider.getAccessTokenValidity() / 1000)
+            .user(UserResponseDto.from(user))
+            .build();
+    }
+
+    /**
+     * 프로필 수정
+     */
+    @Transactional
+    public UserResponseDto updateProfile(Long userId, ProfileUpdateRequestDto request) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException("User not found"));
+
+        user.updateNickname(request.getNickname());
+        
+        log.info("User profile updated: userId={}", userId);
+        
+        return UserResponseDto.from(user);
+    }
+
+    /**
+     * 이메일에서 닉네임 추출 (@ 앞부분)
+     */
+    private String extractNicknameFromEmail(String email) {
+        if (email == null || !email.contains("@")) {
+            return "사용자";
+        }
+        return email.substring(0, email.indexOf("@"));
     }
 
     private User createNewUser(SocialUserInfo socialUserInfo, AuthProvider provider) {
