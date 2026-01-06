@@ -25,6 +25,9 @@ public class User {
     @Column(length = 100)
     private String email;
 
+    @Column(length = 255)
+    private String password;  // BCrypt 암호화된 비밀번호 (소셜 로그인은 null)
+
     @Column(length = 50)
     private String nickname;
 
@@ -41,6 +44,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
+
+    // 약관 동의 정보
+    @Column(name = "terms_agreed")
+    private Boolean termsAgreed;
+
+    @Column(name = "privacy_agreed")
+    private Boolean privacyAgreed;
+
+    @Column(name = "marketing_agreed")
+    private Boolean marketingAgreed;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -64,14 +77,19 @@ public class User {
     }
 
     @Builder
-    public User(String email, String nickname, String profileImageUrl, 
-                AuthProvider provider, String providerId, Role role) {
+    public User(String email, String password, String nickname, String profileImageUrl, 
+                AuthProvider provider, String providerId, Role role,
+                Boolean termsAgreed, Boolean privacyAgreed, Boolean marketingAgreed) {
         this.email = email;
+        this.password = password;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
         this.provider = provider;
         this.providerId = providerId;
         this.role = role != null ? role : Role.USER;
+        this.termsAgreed = termsAgreed;
+        this.privacyAgreed = privacyAgreed;
+        this.marketingAgreed = marketingAgreed;
     }
 
     public void updateProfile(String nickname, String profileImageUrl) {
@@ -80,6 +98,12 @@ public class User {
         }
         if (profileImageUrl != null) {
             this.profileImageUrl = profileImageUrl;
+        }
+    }
+
+    public void updateNickname(String nickname) {
+        if (nickname != null && !nickname.isBlank()) {
+            this.nickname = nickname;
         }
     }
 
@@ -92,7 +116,7 @@ public class User {
     }
 
     public enum AuthProvider {
-        KAKAO, NAVER, APPLE
+        KAKAO, NAVER, APPLE, EMAIL
     }
 
     public enum Role {
