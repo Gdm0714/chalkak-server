@@ -107,16 +107,37 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAuthException(
             AuthException ex, HttpServletRequest request) {
         
-        log.error("Authentication error: {}", ex.getMessage());
+        log.error("Authentication error: {} (code: {})", ex.getMessage(), ex.getCode());
+        
+        HttpStatus status;
+        String error;
+        
+        switch (ex.getCode()) {
+            case "CONFLICT":
+                status = HttpStatus.CONFLICT;
+                error = "Conflict";
+                break;
+            case "UNAUTHORIZED":
+                status = HttpStatus.UNAUTHORIZED;
+                error = "Unauthorized";
+                break;
+            case "NOT_FOUND":
+                status = HttpStatus.NOT_FOUND;
+                error = "Not Found";
+                break;
+            default:
+                status = HttpStatus.UNAUTHORIZED;
+                error = "Unauthorized";
+        }
         
         ErrorResponse errorResponse = new ErrorResponse(
-            HttpStatus.UNAUTHORIZED.value(),
-            "Unauthorized",
+            status.value(),
+            error,
             ex.getMessage(),
             request.getRequestURI()
         );
         
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        return ResponseEntity.status(status).body(errorResponse);
     }
     
     /**
