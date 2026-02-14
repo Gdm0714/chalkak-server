@@ -1,0 +1,279 @@
+/**
+ * 찰칵 API 문서 커스텀 스타일
+ * Google Stitch 디자인 원칙 적용
+ */
+
+/* ==================== 전역 스타일 ==================== */
+:root {
+  /* 브랜드 색상 */
+  --primary-color: #E91E63;
+  --secondary-color: #FF6B9D;
+  --accent-color: #3B82F6;
+
+  /* 중립 색상 */
+  --neutral-50: #FAFAFA;
+  --neutral-100: #F5F5F5;
+  --neutral-200: #E5E5E5;
+  --neutral-700: #404040;
+  --neutral-900: #171717;
+
+  /* Slate 색상 */
+  --slate-50: #F8FAFC;
+  --slate-100: #F1F5F9;
+  --slate-200: #E2E8F0;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1E293B;
+
+  /* 간격 시스템 */
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+
+  /* Border Radius */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+
+  /* 그림자 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* ==================== 타이포그래피 ==================== */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.2px;
+}
+
+.swagger-ui .info .title {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  color: var(--neutral-900) !important;
+  letter-spacing: -0.5px !important;
+  margin-bottom: var(--spacing-md) !important;
+}
+
+.swagger-ui .info .description {
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  color: var(--slate-700) !important;
+}
+
+/* ==================== 상단 바 ==================== */
+.swagger-ui .topbar {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+  padding: var(--spacing-lg) 0 !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.swagger-ui .topbar .download-url-wrapper {
+  display: none;
+}
+
+/* ==================== 태그 ==================== */
+.swagger-ui .opblock-tag {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.3px !important;
+  padding: var(--spacing-md) 0 !important;
+  margin: var(--spacing-xl) 0 var(--spacing-md) 0 !important;
+  border-bottom: 2px solid var(--slate-200) !important;
+  color: var(--neutral-900) !important;
+}
+
+/* ==================== 작업 블록 ==================== */
+.swagger-ui .opblock {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-sm) !important;
+  margin-bottom: var(--spacing-md) !important;
+  border: 1.5px solid var(--slate-200) !important;
+  overflow: hidden;
+}
+
+.swagger-ui .opblock:hover {
+  box-shadow: var(--shadow-md) !important;
+  border-color: var(--slate-300) !important;
+}
+
+/* HTTP 메서드 색상 */
+.swagger-ui .opblock.opblock-get {
+  border-left: 4px solid #10B981 !important;
+}
+
+.swagger-ui .opblock.opblock-post {
+  border-left: 4px solid var(--accent-color) !important;
+}
+
+.swagger-ui .opblock.opblock-put {
+  border-left: 4px solid #F59E0B !important;
+}
+
+.swagger-ui .opblock.opblock-delete {
+  border-left: 4px solid #EF4444 !important;
+}
+
+.swagger-ui .opblock.opblock-patch {
+  border-left: 4px solid #8B5CF6 !important;
+}
+
+/* ==================== 버튼 ==================== */
+.swagger-ui .btn {
+  border-radius: var(--radius-sm) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.2px !important;
+  padding: 10px 20px !important;
+  transition: all 0.2s ease !important;
+}
+
+.swagger-ui .btn.execute {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: white !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.swagger-ui .btn.execute:hover {
+  background-color: #C2185B !important;
+  box-shadow: var(--shadow-md) !important;
+  transform: translateY(-1px);
+}
+
+.swagger-ui .btn.authorize {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 8px 16px !important;
+}
+
+.swagger-ui .btn.authorize:hover {
+  background-color: #2563EB !important;
+}
+
+/* ==================== 입력 필드 ==================== */
+.swagger-ui input[type=text],
+.swagger-ui input[type=password],
+.swagger-ui input[type=search],
+.swagger-ui input[type=email],
+.swagger-ui select,
+.swagger-ui textarea {
+  border-radius: var(--radius-sm) !important;
+  border: 1.5px solid var(--slate-200) !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  font-size: 14px !important;
+  transition: all 0.2s ease !important;
+}
+
+.swagger-ui input[type=text]:focus,
+.swagger-ui input[type=password]:focus,
+.swagger-ui input[type=search]:focus,
+.swagger-ui input[type=email]:focus,
+.swagger-ui select:focus,
+.swagger-ui textarea:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1) !important;
+  outline: none !important;
+}
+
+/* ==================== 테이블 ==================== */
+.swagger-ui table {
+  border-radius: var(--radius-sm) !important;
+  overflow: hidden;
+}
+
+.swagger-ui table thead tr th {
+  background-color: var(--slate-50) !important;
+  color: var(--slate-700) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: -0.1px !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  border-color: var(--slate-200) !important;
+}
+
+.swagger-ui table tbody tr td {
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  border-color: var(--slate-200) !important;
+}
+
+/* ==================== 응답 ==================== */
+.swagger-ui .responses-inner {
+  padding: var(--spacing-md) !important;
+  background-color: var(--slate-50) !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+.swagger-ui .response .response-col_status {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+/* ==================== 모델 ==================== */
+.swagger-ui .model-box {
+  border-radius: var(--radius-sm) !important;
+  background-color: var(--slate-50) !important;
+  border: 1.5px solid var(--slate-200) !important;
+  padding: var(--spacing-md) !important;
+}
+
+.swagger-ui .model-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--neutral-900) !important;
+  letter-spacing: -0.2px !important;
+}
+
+/* ==================== 파라미터 ==================== */
+.swagger-ui .parameter__name {
+  font-weight: 600 !important;
+  color: var(--slate-700) !important;
+}
+
+.swagger-ui .parameter__type {
+  color: var(--accent-color) !important;
+  font-weight: 500 !important;
+}
+
+/* ==================== 인증 ==================== */
+.swagger-ui .auth-wrapper {
+  border-radius: var(--radius-md) !important;
+  border: 1.5px solid var(--slate-200) !important;
+}
+
+.swagger-ui .auth-container {
+  padding: var(--spacing-lg) !important;
+}
+
+/* ==================== 스크롤바 ==================== */
+.swagger-ui ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.swagger-ui ::-webkit-scrollbar-track {
+  background: var(--slate-100);
+  border-radius: 5px;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb {
+  background: var(--slate-300);
+  border-radius: 5px;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-400);
+}
+
+/* ==================== 반응형 ==================== */
+@media (max-width: 768px) {
+  .swagger-ui .info .title {
+    font-size: 24px !important;
+  }
+
+  .swagger-ui .opblock-tag {
+    font-size: 16px !important;
+  }
+}

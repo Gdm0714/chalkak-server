@@ -121,9 +121,26 @@ cors:
 springdoc:
   api-docs:
     enabled: true
+    path: /v3/api-docs
   swagger-ui:
     enabled: true
     disable-swagger-default-url: true
-    url: /v3/api-docs
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    display-request-duration: true
+    default-models-expand-depth: 1
+    default-model-expand-depth: 1
+    try-it-out-enabled: true
+    filter: true
+    syntax-highlight:
+      activated: true
+      theme: monokai
+    csrf:
+      enabled: false
+    custom-css: /swagger-ui/custom.css
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+  show-actuator: false
+  use-management-port: false
