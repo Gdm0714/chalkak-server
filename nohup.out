@@ -1,0 +1,124 @@
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :resolveMainClassName UP-TO-DATE
+
+> Task :bootRun
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.0)
+
+2025-12-30T23:19:52.476+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.ChalkakServerApplication           : Starting ChalkakServerApplication using Java 21.0.8 with PID 3611 (/Users/godongmin/Desktop/02_개인/01_개발/01_앱/chalkak-server/build/classes/java/main started by godongmin in /Users/godongmin/Desktop/02_개인/01_개발/01_앱/chalkak-server)
+2025-12-30T23:19:52.477+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.ChalkakServerApplication           : No active profile set, falling back to 1 default profile: "default"
+2025-12-30T23:19:52.496+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-12-30T23:19:52.496+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-12-30T23:19:53.037+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-12-30T23:19:53.038+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-30T23:19:53.111+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 68 ms. Found 5 JPA repository interfaces.
+2025-12-30T23:19:53.117+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2025-12-30T23:19:53.118+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-12-30T23:19:53.126+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.min.chalkakserver.repository.FavoriteRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-12-30T23:19:53.126+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.min.chalkakserver.repository.PhotoBoothRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-12-30T23:19:53.126+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.min.chalkakserver.repository.RefreshTokenRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-12-30T23:19:53.127+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.min.chalkakserver.repository.ReviewRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-12-30T23:19:53.127+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.min.chalkakserver.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-12-30T23:19:53.127+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 5 ms. Found 0 Redis repository interfaces.
+2025-12-30T23:19:53.519+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
+2025-12-30T23:19:53.526+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-12-30T23:19:53.526+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.41]
+2025-12-30T23:19:53.543+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-12-30T23:19:53.544+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1047 ms
+2025-12-30T23:19:53.605+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.security.jwt.JwtTokenProvider      : JWT Token Provider initialized successfully
+2025-12-30T23:19:53.665+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-30T23:19:53.689+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.15.Final
+2025-12-30T23:19:53.701+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-12-30T23:19:53.812+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-30T23:19:53.823+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-12-30T23:19:53.900+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6df59a5c
+2025-12-30T23:19:53.900+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-12-30T23:19:53.922+09:00  WARN 3611 --- [chalkak-server] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-12-30T23:19:53.928+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.0.44
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-12-30T23:19:54.291+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-30T23:19:54.368+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-30T23:19:54.471+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-12-30T23:19:55.299+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.chalkakserver.config.OpenApiConfig   : OpenApiConfig openAPI Bean is being created
+2025-12-30T23:19:55.521+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+2025-12-30T23:19:55.576+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.chalkakserver.config.SecurityConfig  : SecurityConfig filterChain Bean is being created
+2025-12-30T23:19:55.894+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-12-30T23:19:55.925+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/'
+2025-12-30T23:19:55.936+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.ChalkakServerApplication           : Started ChalkakServerApplication in 3.628 seconds (process running for 3.789)
+2025-12-30T23:19:55.964+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 캐시 워밍업 시작...
+2025-12-30T23:19:56.138+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 모든 네컷사진관 조회 - DB에서 데이터 조회
+2025-12-30T23:19:56.176+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 전체 네컷사진관 목록 캐싱 완료
+2025-12-30T23:19:56.179+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 근처 네컷사진관 검색 - 위도: 37.5565, 경도: 126.9239, 반경: 2.0km - DB에서 데이터 조회
+2025-12-30T23:19:56.199+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 홍대 지역 근처 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.200+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 근처 네컷사진관 검색 - 위도: 37.4979, 경도: 127.0276, 반경: 2.0km - DB에서 데이터 조회
+2025-12-30T23:19:56.202+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [nearbyPhotoBooths] 메서드 getNearbyPhotoBooths 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.203+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 강남 지역 근처 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.204+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 근처 네컷사진관 검색 - 위도: 37.5636, 경도: 126.9869, 반경: 2.0km - DB에서 데이터 조회
+2025-12-30T23:19:56.206+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [nearbyPhotoBooths] 메서드 getNearbyPhotoBooths 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.207+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 명동 지역 근처 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.208+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 근처 네컷사진관 검색 - 위도: 37.5585, 경도: 126.9386, 반경: 2.0km - DB에서 데이터 조회
+2025-12-30T23:19:56.210+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [nearbyPhotoBooths] 메서드 getNearbyPhotoBooths 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.211+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 신촌 지역 근처 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.213+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 근처 네컷사진관 검색 - 위도: 37.541, 경도: 127.0695, 반경: 2.0km - DB에서 데이터 조회
+2025-12-30T23:19:56.215+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [nearbyPhotoBooths] 메서드 getNearbyPhotoBooths 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.217+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 건대 지역 근처 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.218+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 근처 네컷사진관 검색 - 위도: 37.5704, 경도: 126.9914, 반경: 2.0km - DB에서 데이터 조회
+2025-12-30T23:19:56.219+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [nearbyPhotoBooths] 메서드 getNearbyPhotoBooths 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.221+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 종로 지역 근처 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.222+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 근처 네컷사진관 검색 - 위도: 37.5446, 경도: 127.0565, 반경: 2.0km - DB에서 데이터 조회
+2025-12-30T23:19:56.224+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [nearbyPhotoBooths] 메서드 getNearbyPhotoBooths 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.226+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 성수 지역 근처 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.227+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 근처 네컷사진관 검색 - 위도: 37.5131, 경도: 127.1002, 반경: 2.0km - DB에서 데이터 조회
+2025-12-30T23:19:56.229+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [nearbyPhotoBooths] 메서드 getNearbyPhotoBooths 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.230+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 잠실 지역 근처 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.231+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 브랜드로 검색 - 브랜드: 인생네컷 - DB에서 데이터 조회
+2025-12-30T23:19:56.238+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [brandPhotoBooths] 메서드 getPhotoBoothsByBrand 실행 시간: 6ms (캐시 히트)
+2025-12-30T23:19:56.240+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 인생네컷 브랜드 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.241+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 브랜드로 검색 - 브랜드: 포토이즘 - DB에서 데이터 조회
+2025-12-30T23:19:56.243+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [brandPhotoBooths] 메서드 getPhotoBoothsByBrand 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.246+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 포토이즘 브랜드 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.247+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 브랜드로 검색 - 브랜드: 하루필름 - DB에서 데이터 조회
+2025-12-30T23:19:56.249+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [brandPhotoBooths] 메서드 getPhotoBoothsByBrand 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.251+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 하루필름 브랜드 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.252+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 브랜드로 검색 - 브랜드: 포토그레이 - DB에서 데이터 조회
+2025-12-30T23:19:56.254+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [brandPhotoBooths] 메서드 getPhotoBoothsByBrand 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.255+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 포토그레이 브랜드 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.256+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 브랜드로 검색 - 브랜드: 모노맨션 - DB에서 데이터 조회
+2025-12-30T23:19:56.258+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [brandPhotoBooths] 메서드 getPhotoBoothsByBrand 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.260+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 모노맨션 브랜드 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.261+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 브랜드로 검색 - 브랜드: 포토시그니처 - DB에서 데이터 조회
+2025-12-30T23:19:56.263+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [brandPhotoBooths] 메서드 getPhotoBoothsByBrand 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.264+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 포토시그니처 브랜드 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.266+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 브랜드로 검색 - 브랜드: 모드빈티크 - DB에서 데이터 조회
+2025-12-30T23:19:56.267+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [brandPhotoBooths] 메서드 getPhotoBoothsByBrand 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.268+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 모드빈티크 브랜드 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.269+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 브랜드로 검색 - 브랜드: RGB 포토스튜디오 - DB에서 데이터 조회
+2025-12-30T23:19:56.270+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [brandPhotoBooths] 메서드 getPhotoBoothsByBrand 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.272+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : RGB 포토스튜디오 브랜드 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.274+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 브랜드로 검색 - 브랜드: Plan B Studio - DB에서 데이터 조회
+2025-12-30T23:19:56.277+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [brandPhotoBooths] 메서드 getPhotoBoothsByBrand 실행 시간: 3ms (캐시 히트)
+2025-12-30T23:19:56.280+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : Plan B Studio 브랜드 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.281+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.service.PhotoBoothService          : 브랜드로 검색 - 브랜드: Photomatic - DB에서 데이터 조회
+2025-12-30T23:19:56.283+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [brandPhotoBooths] 메서드 getPhotoBoothsByBrand 실행 시간: 1ms (캐시 히트)
+2025-12-30T23:19:56.285+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : Photomatic 브랜드 네컷사진관 캐싱 완료
+2025-12-30T23:19:56.285+09:00  INFO 3611 --- [chalkak-server] [  restartedMain] c.m.c.config.cache.CacheWarmupRunner     : 캐시 워밍업 완료!
+2025-12-30T23:19:57.035+09:00  INFO 3611 --- [chalkak-server] [0.0-8082-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-12-30T23:19:57.035+09:00  INFO 3611 --- [chalkak-server] [0.0-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-12-30T23:19:57.036+09:00  INFO 3611 --- [chalkak-server] [0.0-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-12-30T23:19:57.090+09:00  INFO 3611 --- [chalkak-server] [0.0-8082-exec-1] c.m.c.service.PhotoBoothService          : 근처 네컷사진관 검색 - 위도: 37.56156130263992, 경도: 127.06107946470331, 반경: 5.0km - DB에서 데이터 조회
+2025-12-30T23:19:57.092+09:00  INFO 3611 --- [chalkak-server] [0.0-8082-exec-1] c.m.c.c.cache.CachePerformanceAspect     : 캐시 [nearbyPhotoBooths] 메서드 getNearbyPhotoBooths 실행 시간: 2ms (캐시 히트)

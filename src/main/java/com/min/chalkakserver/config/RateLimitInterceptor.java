@@ -26,11 +26,16 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         String ipAddress = getClientIP(request);
         String requestUri = request.getRequestURI();
 
-        // 제보 API는 더 엄격한 제한 적용
+        // API 종류에 따른 Rate Limit 적용
         Bucket bucket;
-        if (requestUri.contains("/report")) {
+        if (requestUri.contains("/auth/login") || requestUri.contains("/auth/refresh")) {
+            // 인증 API: 브루트포스 공격 방지를 위한 엄격한 제한
+            bucket = rateLimitConfig.resolveAuthBucket(ipAddress);
+        } else if (requestUri.contains("/report")) {
+            // 제보 API: 스팸 방지
             bucket = rateLimitConfig.resolveReportBucket(ipAddress);
         } else {
+            // 일반 API
             bucket = rateLimitConfig.resolveBucket(ipAddress);
         }
 
