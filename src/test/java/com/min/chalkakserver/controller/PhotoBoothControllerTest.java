@@ -1,13 +1,20 @@
 package com.min.chalkakserver.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.min.chalkakserver.dto.PhotoBoothRequestDto;
+import com.min.chalkakserver.config.RateLimitConfig;
+import com.min.chalkakserver.config.WebMvcConfig;
+import com.min.chalkakserver.dto.PhotoBoothReportDto;
 import com.min.chalkakserver.exception.PhotoBoothNotFoundException;
+import com.min.chalkakserver.security.jwt.JwtAuthenticationFilter;
+import com.min.chalkakserver.service.EmailService;
 import com.min.chalkakserver.service.PhotoBoothService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -16,7 +23,14 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(PhotoBoothController.class)
+@WebMvcTest(
+        controllers = PhotoBoothController.class,
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = WebMvcConfig.class
+        )
+)
+@AutoConfigureMockMvc(addFilters = false)
 class PhotoBoothControllerTest {
 
     @Autowired
@@ -27,6 +41,15 @@ class PhotoBoothControllerTest {
 
     @MockBean
     private PhotoBoothService photoBoothService;
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockBean
+    private RateLimitConfig rateLimitConfig;
+
+    @MockBean
+    private EmailService emailService;
 
     @Test
     void getPhotoBoothById_NotFound_ShouldReturn404() throws Exception {
@@ -45,13 +68,13 @@ class PhotoBoothControllerTest {
     }
 
     @Test
-    void createPhotoBooth_InvalidInput_ShouldReturn400() throws Exception {
+    void reportPhotoBooth_InvalidInput_ShouldReturn400() throws Exception {
         // Given
-        PhotoBoothRequestDto invalidRequest = new PhotoBoothRequestDto();
+        PhotoBoothReportDto invalidRequest = new PhotoBoothReportDto();
         // 필수 필드를 비워둠
 
         // When & Then
-        mockMvc.perform(post("/api/photo-booths")
+        mockMvc.perform(post("/api/photo-booths/report")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest())

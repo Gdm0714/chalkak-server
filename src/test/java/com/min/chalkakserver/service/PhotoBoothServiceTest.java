@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -43,7 +44,6 @@ class PhotoBoothServiceTest {
     @BeforeEach
     void setUp() {
         testPhotoBooth = PhotoBooth.builder()
-                .id(1L)
                 .name("테스트 사진관")
                 .brand("인생네컷")
                 .address("서울특별시 강남구 역삼동")
@@ -51,9 +51,9 @@ class PhotoBoothServiceTest {
                 .latitude(37.5012)
                 .longitude(127.0396)
                 .build();
+        setEntityId(testPhotoBooth, 1L);
 
         testPhotoBooth2 = PhotoBooth.builder()
-                .id(2L)
                 .name("테스트 사진관2")
                 .brand("하루필름")
                 .address("서울특별시 서초구 서초동")
@@ -61,6 +61,7 @@ class PhotoBoothServiceTest {
                 .latitude(37.4920)
                 .longitude(127.0300)
                 .build();
+        setEntityId(testPhotoBooth2, 2L);
     }
 
     @Nested
@@ -275,6 +276,86 @@ class PhotoBoothServiceTest {
             // then
             assertThat(result).hasSize(1);
             assertThat(result.get(0).getBrand()).isEqualTo("인생네컷");
+        }
+
+        @Test
+        @DisplayName("브랜드와 시리즈로 네컷사진관을 검색한다")
+        void getPhotoBoothsByBrandAndSeries_Success() {
+            // given
+            String brand = "인생네컷";
+            String series = "컬러";
+            PhotoBooth seriesBooth = PhotoBooth.builder()
+                    .name("인생네컷 컬러점")
+                    .brand(brand)
+                    .series(series)
+                    .address("서울시 마포구")
+                    .latitude(37.55)
+                    .longitude(126.92)
+                    .build();
+            setEntityId(seriesBooth, 3L);
+
+            given(photoBoothRepository.findByBrandContainingIgnoreCaseAndSeriesContainingIgnoreCase(brand, series))
+                    .willReturn(List.of(seriesBooth));
+
+            // when
+            List<PhotoBoothResponseDto> result = photoBoothService.getPhotoBoothsByBrandAndSeries(brand, series);
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getBrand()).isEqualTo(brand);
+            assertThat(result.get(0).getSeries()).isEqualTo(series);
+        }
+
+        @Test
+        @DisplayName("시리즈로 네컷사진관을 검색한다")
+        void getPhotoBoothsBySeries_Success() {
+            // given
+            String series = "오리지널";
+            PhotoBooth seriesBooth = PhotoBooth.builder()
+                    .name("오리지널 네컷")
+                    .brand("하루필름")
+                    .series(series)
+                    .address("서울시 송파구")
+                    .latitude(37.51)
+                    .longitude(127.10)
+                    .build();
+            setEntityId(seriesBooth, 4L);
+
+            given(photoBoothRepository.findBySeriesContainingIgnoreCase(series))
+                    .willReturn(List.of(seriesBooth));
+
+            // when
+            List<PhotoBoothResponseDto> result = photoBoothService.getPhotoBoothsBySeries(series);
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getSeries()).isEqualTo(series);
+        }
+    }
+
+    @Nested
+    @DisplayName("삭제 테스트")
+    class DeletePhotoBoothTest {
+
+        @Test
+        @DisplayName("존재하지 않는 네컷사진관 삭제 시 예외가 발생한다")
+        void deletePhotoBooth_NotFound() {
+            // given
+            given(photoBoothRepository.existsById(999L)).willReturn(false);
+
+            // when & then
+            assertThatThrownBy(() -> photoBoothService.deletePhotoBooth(999L))
+                    .isInstanceOf(PhotoBoothNotFoundException.class);
+        }
+    }
+
+    private void setEntityId(PhotoBooth photoBooth, Long id) {
+        try {
+            Field idField = PhotoBooth.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(photoBooth, id);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("테스트용 PhotoBooth ID 설정에 실패했습니다.", e);
         }
     }
 }

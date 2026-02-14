@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    active: test
-    
   # H2 Database for Testing
   datasource:
     url: jdbc:h2:mem:testdb
@@ -18,13 +15,8 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
         
-  # Embedded Redis for Testing
-  redis:
-    host: localhost
-    port: 6370  # 테스트용 다른 포트
-    
   cache:
-    type: redis
+    type: simple
     
 logging:
   level:

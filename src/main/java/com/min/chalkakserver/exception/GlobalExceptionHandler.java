@@ -1,6 +1,8 @@
 package com.min.chalkakserver.exception;
 
 import com.min.chalkakserver.dto.ErrorResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,38 @@ public class GlobalExceptionHandler {
         );
         
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * @Validated 기반 파라미터 검증 실패 (예: @RequestParam @Min/@Max)
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+            ConstraintViolationException ex, HttpServletRequest request) {
+
+        log.error("Constraint violation: {}", ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        Map<String, String> fieldErrors = new HashMap<>();
+
+        for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
+            String propertyPath = violation.getPropertyPath() != null
+                    ? violation.getPropertyPath().toString()
+                    : "unknown";
+            fieldErrors.put(propertyPath, violation.getMessage());
+        }
+
+        details.put("fieldErrors", fieldErrors);
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation Failed",
+                "요청 파라미터가 유효하지 않습니다.",
+                request.getRequestURI(),
+                details
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
     
     /**
