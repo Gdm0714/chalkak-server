@@ -219,6 +219,26 @@ public class GlobalExceptionHandler {
         
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
+
+    @ExceptionHandler(DuplicateCongestionReportException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateCongestionReportException(
+            DuplicateCongestionReportException ex, HttpServletRequest request) {
+
+        log.error("Duplicate congestion report: {}", ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("photoBoothId", ex.getPhotoBoothId());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.CONFLICT.value(),
+            "Conflict",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
     
     /**
      * Validation 실패

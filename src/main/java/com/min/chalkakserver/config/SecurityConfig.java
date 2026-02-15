@@ -56,6 +56,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login", "/api/auth/login/email", "/api/auth/register", "/api/auth/refresh", "/api/auth/logout").permitAll()
                 // 포토부스 조회 API는 인증 없이 허용 (GET만)
                 .requestMatchers(HttpMethod.GET, "/api/photo-booths/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/congestion/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/photo-booths/report").permitAll()
                 // 헬스체크 허용
                 .requestMatchers("/api/health").permitAll()
