@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,5 +45,13 @@ public class CongestionController {
                 request
         );
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "일괄 혼잡도 조회", description = "여러 매장의 혼잡도를 한번에 조회합니다.")
+    @GetMapping("/photo-booths/batch")
+    public ResponseEntity<List<CongestionResponseDto>> getBatchCongestion(
+            @RequestParam List<Long> ids
+    ) {
+        return ResponseEntity.ok(congestionService.getBatchCongestion(ids));
     }
 }

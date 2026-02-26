@@ -70,6 +70,26 @@ public class CongestionService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public List<CongestionResponseDto> getBatchCongestion(List<Long> photoBoothIds) {
+        LocalDateTime cutoff = LocalDateTime.now().minusMinutes(AGGREGATION_WINDOW_MINUTES);
+
+        return photoBoothIds.stream().map(photoBoothId -> {
+            try {
+                return getCurrentCongestion(photoBoothId);
+            } catch (Exception e) {
+                log.warn("Failed to get congestion for photoBoothId={}: {}", photoBoothId, e.getMessage());
+                return CongestionResponseDto.builder()
+                        .photoBoothId(photoBoothId)
+                        .congestionLevel(CongestionReport.CongestionLevel.UNKNOWN)
+                        .confidenceLevel(CongestionResponseDto.ConfidenceLevel.LOW)
+                        .sampleSize(0)
+                        .message("혼잡도 정보를 불러올 수 없습니다.")
+                        .build();
+            }
+        }).toList();
+    }
+
     public CongestionReportResponseDto submitReport(Long userId, Long photoBoothId, CongestionReportRequestDto request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
