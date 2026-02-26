@@ -55,4 +55,8 @@ public class PhotoBoothReportDto {
 
     @Email
     private String reporterEmail;
+
+    // 사용자 GPS 위치 (제보 시 현재 위치)
+    private Double userLatitude;
+    private Double userLongitude;
 }
