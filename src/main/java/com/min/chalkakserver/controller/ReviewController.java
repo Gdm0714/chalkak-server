@@ -73,9 +73,10 @@ public class ReviewController {
     public ResponseEntity<PagedResponseDto<ReviewResponseDto>> getPhotoBoothReviewsPaged(
             @PathVariable Long photoBoothId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        PagedResponseDto<ReviewResponseDto> response = 
-            reviewService.getPhotoBoothReviewsPaged(photoBoothId, page, size);
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "latest") String sortBy) {
+        PagedResponseDto<ReviewResponseDto> response =
+            reviewService.getPhotoBoothReviewsPaged(photoBoothId, page, size, sortBy);
         return ResponseEntity.ok(response);
     }
 
@@ -113,6 +114,15 @@ public class ReviewController {
     public ResponseEntity<ReviewResponseDto> getReview(
             @PathVariable Long reviewId) {
         ReviewResponseDto response = reviewService.getReview(reviewId);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "최근 리뷰 피드", description = "최근 작성된 리뷰를 전체 피드로 조회 (로그인 불필요)")
+    @GetMapping("/recent")
+    public ResponseEntity<PagedResponseDto<ReviewResponseDto>> getRecentReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        PagedResponseDto<ReviewResponseDto> response = reviewService.getRecentReviews(page, size);
         return ResponseEntity.ok(response);
     }
 

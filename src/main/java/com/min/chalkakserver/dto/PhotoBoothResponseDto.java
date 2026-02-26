@@ -23,7 +23,10 @@ public class PhotoBoothResponseDto {
     private String priceInfo;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    
+    private Double averageRating;
+    private Long reviewCount;
+    private Long favoriteCount;
+
     public static PhotoBoothResponseDto from(PhotoBooth photoBooth) {
         return PhotoBoothResponseDto.builder()
                 .id(photoBooth.getId())
@@ -38,6 +41,29 @@ public class PhotoBoothResponseDto {
                 .priceInfo(photoBooth.getPriceInfo())
                 .createdAt(photoBooth.getCreatedAt())
                 .updatedAt(photoBooth.getUpdatedAt())
+                .averageRating(0.0)
+                .reviewCount(0L)
+                .favoriteCount(0L)
+                .build();
+    }
+
+    public static PhotoBoothResponseDto fromWithStats(PhotoBooth photoBooth, Double avgRating, Long reviewCount, Long favoriteCount) {
+        return PhotoBoothResponseDto.builder()
+                .id(photoBooth.getId())
+                .name(photoBooth.getName())
+                .brand(photoBooth.getBrand())
+                .series(photoBooth.getSeries())
+                .address(photoBooth.getAddress())
+                .roadAddress(photoBooth.getRoadAddress())
+                .latitude(photoBooth.getLatitude())
+                .longitude(photoBooth.getLongitude())
+                .description(photoBooth.getDescription())
+                .priceInfo(photoBooth.getPriceInfo())
+                .createdAt(photoBooth.getCreatedAt())
+                .updatedAt(photoBooth.getUpdatedAt())
+                .averageRating(avgRating != null ? Math.round(avgRating * 10) / 10.0 : 0.0)
+                .reviewCount(reviewCount != null ? reviewCount : 0L)
+                .favoriteCount(favoriteCount != null ? favoriteCount : 0L)
                 .build();
     }
     

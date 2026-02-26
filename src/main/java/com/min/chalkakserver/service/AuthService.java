@@ -5,7 +5,9 @@ import com.min.chalkakserver.entity.RefreshToken;
 import com.min.chalkakserver.entity.User;
 import com.min.chalkakserver.entity.User.AuthProvider;
 import com.min.chalkakserver.exception.AuthException;
+import com.min.chalkakserver.repository.FavoriteRepository;
 import com.min.chalkakserver.repository.RefreshTokenRepository;
+import com.min.chalkakserver.repository.ReviewRepository;
 import com.min.chalkakserver.repository.UserRepository;
 import com.min.chalkakserver.security.CustomUserDetails;
 import com.min.chalkakserver.security.jwt.JwtTokenProvider;
@@ -29,6 +31,8 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final SocialAuthService socialAuthService;
     private final PasswordEncoder passwordEncoder;
+    private final ReviewRepository reviewRepository;
+    private final FavoriteRepository favoriteRepository;
 
     /**
      * 소셜 로그인 처리
@@ -282,6 +286,23 @@ public class AuthService {
             .tokenType("Bearer")
             .expiresIn(jwtTokenProvider.getAccessTokenValidity() / 1000)
             .user(UserResponseDto.from(user))
+            .build();
+    }
+
+    /**
+     * 사용자 활동 통계 조회
+     */
+    @Transactional(readOnly = true)
+    public UserStatsDto getUserStats(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException("User not found"));
+
+        long reviewCount = reviewRepository.countByUser(user);
+        long favoriteCount = favoriteRepository.countByUser(user);
+
+        return UserStatsDto.builder()
+            .reviewCount(reviewCount)
+            .favoriteCount(favoriteCount)
             .build();
     }
 

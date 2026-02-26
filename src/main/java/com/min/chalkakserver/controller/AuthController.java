@@ -89,6 +89,15 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다."));
     }
 
+    @Operation(summary = "사용자 활동 통계", description = "현재 사용자의 리뷰 수, 즐겨찾기 수 등 활동 통계")
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/me/stats")
+    public ResponseEntity<UserStatsDto> getUserStats(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserStatsDto response = authService.getUserStats(userDetails.getId());
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "프로필 수정", description = "닉네임 등 프로필 정보 수정")
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/profile")

@@ -91,12 +91,33 @@ public class PhotoBoothService {
                 .collect(Collectors.toList());
     }
     
+    // 인기 포토부스 조회
+    @Transactional(readOnly = true)
+    @Cacheable(value = "popularPhotoBooths", key = "#limit", unless = "#result == null || #result.isEmpty()")
+    public List<PhotoBoothResponseDto> getPopularPhotoBooths(int limit) {
+        log.info("인기 포토부스 조회 - 상위 {}개 - DB에서 데이터 조회", limit);
+        return photoBoothRepository.findPopularPhotoBooths(limit)
+                .stream()
+                .map(PhotoBoothResponseDto::from)
+                .collect(Collectors.toList());
+    }
+
+    // 모든 브랜드 목록 조회
+    @Transactional(readOnly = true)
+    @Cacheable(value = "brands", unless = "#result == null || #result.isEmpty()")
+    public List<String> getAllBrands() {
+        log.info("전체 브랜드 목록 조회 - DB에서 데이터 조회");
+        return photoBoothRepository.findAllBrands();
+    }
+
     // 네컷사진관 생성
     @Caching(evict = {
         @CacheEvict(value = "photoBooths", allEntries = true),
         @CacheEvict(value = "nearbyPhotoBooths", allEntries = true),
         @CacheEvict(value = "searchResults", allEntries = true),
-        @CacheEvict(value = "brandPhotoBooths", allEntries = true)
+        @CacheEvict(value = "brandPhotoBooths", allEntries = true),
+        @CacheEvict(value = "popularPhotoBooths", allEntries = true),
+        @CacheEvict(value = "brands", allEntries = true)
     })
     public PhotoBoothResponseDto createPhotoBooth(PhotoBoothRequestDto requestDto) {
         log.info("네컷사진관 생성 - 이름: {}", requestDto.getName());
@@ -116,7 +137,9 @@ public class PhotoBoothService {
         @CacheEvict(value = "photoBooth", key = "#id"),
         @CacheEvict(value = "nearbyPhotoBooths", allEntries = true),
         @CacheEvict(value = "searchResults", allEntries = true),
-        @CacheEvict(value = "brandPhotoBooths", allEntries = true)
+        @CacheEvict(value = "brandPhotoBooths", allEntries = true),
+        @CacheEvict(value = "popularPhotoBooths", allEntries = true),
+        @CacheEvict(value = "brands", allEntries = true)
     })
     public PhotoBoothResponseDto updatePhotoBooth(Long id, PhotoBoothRequestDto requestDto) {
         log.info("네컷사진관 수정 - ID: {}", id);
@@ -149,7 +172,9 @@ public class PhotoBoothService {
         @CacheEvict(value = "photoBooth", key = "#id"),
         @CacheEvict(value = "nearbyPhotoBooths", allEntries = true),
         @CacheEvict(value = "searchResults", allEntries = true),
-        @CacheEvict(value = "brandPhotoBooths", allEntries = true)
+        @CacheEvict(value = "brandPhotoBooths", allEntries = true),
+        @CacheEvict(value = "popularPhotoBooths", allEntries = true),
+        @CacheEvict(value = "brands", allEntries = true)
     })
     public void deletePhotoBooth(Long id) {
         log.info("네컷사진관 삭제 - ID: {}", id);

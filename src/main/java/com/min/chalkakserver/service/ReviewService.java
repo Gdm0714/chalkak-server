@@ -121,12 +121,19 @@ public class ReviewService {
      */
     @Transactional(readOnly = true)
     public PagedResponseDto<ReviewResponseDto> getPhotoBoothReviewsPaged(
-            Long photoBoothId, int page, int size) {
+            Long photoBoothId, int page, int size, String sortBy) {
         PhotoBooth photoBooth = photoBoothRepository.findById(photoBoothId)
             .orElseThrow(() -> new PhotoBoothNotFoundException(photoBoothId));
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<Review> reviewPage = reviewRepository.findByPhotoBoothWithUserPaged(photoBooth, pageable);
+        Page<Review> reviewPage;
+        if ("rating_high".equals(sortBy)) {
+            reviewPage = reviewRepository.findByPhotoBoothWithUserPagedOrderByRatingDesc(photoBooth, pageable);
+        } else if ("rating_low".equals(sortBy)) {
+            reviewPage = reviewRepository.findByPhotoBoothWithUserPagedOrderByRatingAsc(photoBooth, pageable);
+        } else {
+            reviewPage = reviewRepository.findByPhotoBoothWithUserPaged(photoBooth, pageable);
+        }
 
         List<ReviewResponseDto> content = reviewPage.getContent().stream()
             .map(ReviewResponseDto::from)
@@ -226,6 +233,35 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
             .orElseThrow(() -> new ReviewNotFoundException(reviewId));
         return ReviewResponseDto.from(review);
+    }
+
+    /**
+     * 최근 리뷰 목록 조회 (전체 - 피드용)
+     */
+    @Transactional(readOnly = true)
+    public PagedResponseDto<ReviewResponseDto> getRecentReviews(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<Review> reviews = reviewRepository.findRecentReviews(pageable);
+
+        // Total count for pagination
+        long totalCount = reviewRepository.count();
+        int totalPages = (int) Math.ceil((double) totalCount / size);
+
+        List<ReviewResponseDto> content = reviews.stream()
+            .map(ReviewResponseDto::from)
+            .collect(Collectors.toList());
+
+        return new PagedResponseDto<>(
+            content,
+            page,
+            size,
+            totalCount,
+            totalPages,
+            page == 0,
+            page >= totalPages - 1,
+            page < totalPages - 1,
+            page > 0
+        );
     }
 
     /**

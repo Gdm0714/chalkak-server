@@ -26,6 +26,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r FROM Review r JOIN FETCH r.user WHERE r.photoBooth = :photoBooth ORDER BY r.createdAt DESC")
     Page<Review> findByPhotoBoothWithUserPaged(@Param("photoBooth") PhotoBooth photoBooth, Pageable pageable);
 
+    @Query("SELECT r FROM Review r JOIN FETCH r.user WHERE r.photoBooth = :photoBooth ORDER BY r.rating DESC, r.createdAt DESC")
+    Page<Review> findByPhotoBoothWithUserPagedOrderByRatingDesc(@Param("photoBooth") PhotoBooth photoBooth, Pageable pageable);
+
+    @Query("SELECT r FROM Review r JOIN FETCH r.user WHERE r.photoBooth = :photoBooth ORDER BY r.rating ASC, r.createdAt DESC")
+    Page<Review> findByPhotoBoothWithUserPagedOrderByRatingAsc(@Param("photoBooth") PhotoBooth photoBooth, Pageable pageable);
+
     @Query("SELECT r FROM Review r JOIN FETCH r.photoBooth WHERE r.user = :user ORDER BY r.createdAt DESC")
     List<Review> findByUserWithPhotoBooth(@Param("user") User user);
 
@@ -48,4 +54,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT COUNT(r) FROM Review r WHERE r.createdAt >= :dateTime")
     long countByCreatedAtAfter(@Param("dateTime") java.time.LocalDateTime dateTime);
+
+    @Query("SELECT r FROM Review r JOIN FETCH r.user JOIN FETCH r.photoBooth ORDER BY r.createdAt DESC")
+    List<Review> findRecentReviews(Pageable pageable);
 }
