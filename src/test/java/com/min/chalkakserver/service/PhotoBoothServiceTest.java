@@ -334,8 +334,99 @@ class PhotoBoothServiceTest {
     }
 
     @Nested
+    @DisplayName("생성 테스트")
+    class CreatePhotoBoothTest {
+
+        @Test
+        @DisplayName("네컷사진관을 정상적으로 생성한다")
+        void createPhotoBooth_Success() {
+            // given
+            com.min.chalkakserver.dto.PhotoBoothRequestDto requestDto = com.min.chalkakserver.dto.PhotoBoothRequestDto.builder()
+                    .name("새 사진관")
+                    .brand("인생네컷")
+                    .address("서울시 마포구")
+                    .latitude(37.55)
+                    .longitude(126.92)
+                    .build();
+            PhotoBooth saved = PhotoBooth.builder()
+                    .name("새 사진관")
+                    .brand("인생네컷")
+                    .address("서울시 마포구")
+                    .latitude(37.55)
+                    .longitude(126.92)
+                    .build();
+            setEntityId(saved, 10L);
+            given(photoBoothRepository.save(any(PhotoBooth.class))).willReturn(saved);
+
+            // when
+            PhotoBoothResponseDto result = photoBoothService.createPhotoBooth(requestDto);
+
+            // then
+            assertThat(result.getId()).isEqualTo(10L);
+            assertThat(result.getName()).isEqualTo("새 사진관");
+            assertThat(result.getBrand()).isEqualTo("인생네컷");
+        }
+    }
+
+    @Nested
+    @DisplayName("수정 테스트")
+    class UpdatePhotoBoothTest {
+
+        @Test
+        @DisplayName("네컷사진관을 정상적으로 수정한다")
+        void updatePhotoBooth_Success() {
+            // given
+            com.min.chalkakserver.dto.PhotoBoothRequestDto requestDto = com.min.chalkakserver.dto.PhotoBoothRequestDto.builder()
+                    .name("수정된 사진관")
+                    .brand("하루필름")
+                    .address("서울시 서초구")
+                    .latitude(37.49)
+                    .longitude(127.03)
+                    .build();
+            given(photoBoothRepository.findById(1L)).willReturn(Optional.of(testPhotoBooth));
+            given(photoBoothRepository.save(any(PhotoBooth.class))).willReturn(testPhotoBooth);
+
+            // when
+            PhotoBoothResponseDto result = photoBoothService.updatePhotoBooth(1L, requestDto);
+
+            // then
+            assertThat(result).isNotNull();
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 네컷사진관 수정 시 예외가 발생한다")
+        void updatePhotoBooth_NotFound() {
+            // given
+            com.min.chalkakserver.dto.PhotoBoothRequestDto requestDto = com.min.chalkakserver.dto.PhotoBoothRequestDto.builder()
+                    .name("수정된 사진관")
+                    .address("서울시")
+                    .latitude(37.5)
+                    .longitude(127.0)
+                    .build();
+            given(photoBoothRepository.findById(999L)).willReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> photoBoothService.updatePhotoBooth(999L, requestDto))
+                    .isInstanceOf(PhotoBoothNotFoundException.class);
+        }
+    }
+
+    @Nested
     @DisplayName("삭제 테스트")
     class DeletePhotoBoothTest {
+
+        @Test
+        @DisplayName("네컷사진관을 정상적으로 삭제한다")
+        void deletePhotoBooth_Success() {
+            // given
+            given(photoBoothRepository.existsById(1L)).willReturn(true);
+
+            // when
+            photoBoothService.deletePhotoBooth(1L);
+
+            // then
+            org.mockito.Mockito.verify(photoBoothRepository).deleteById(1L);
+        }
 
         @Test
         @DisplayName("존재하지 않는 네컷사진관 삭제 시 예외가 발생한다")
@@ -346,6 +437,55 @@ class PhotoBoothServiceTest {
             // when & then
             assertThatThrownBy(() -> photoBoothService.deletePhotoBooth(999L))
                     .isInstanceOf(PhotoBoothNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("페이지네이션 검색 테스트")
+    class SearchPagedTest {
+
+        @Test
+        @DisplayName("키워드로 페이지네이션 검색한다")
+        void searchPhotoBoothsPaged_Success() {
+            // given
+            Page<PhotoBooth> page = new PageImpl<>(
+                    Arrays.asList(testPhotoBooth),
+                    Pageable.ofSize(20),
+                    1
+            );
+            given(photoBoothRepository.findByNameContainingIgnoreCaseOrAddressContainingIgnoreCase(
+                    eq("강남"), eq("강남"), any(org.springframework.data.domain.Pageable.class)))
+                    .willReturn(page);
+
+            // when
+            PagedResponseDto<PhotoBoothResponseDto> result =
+                    photoBoothService.searchPhotoBoothsPaged("강남", 0, 20);
+
+            // then
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getTotalElements()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("브랜드로 페이지네이션 검색한다")
+        void getPhotoBoothsByBrandPaged_Success() {
+            // given
+            Page<PhotoBooth> page = new PageImpl<>(
+                    Arrays.asList(testPhotoBooth),
+                    Pageable.ofSize(20),
+                    1
+            );
+            given(photoBoothRepository.findByBrandContainingIgnoreCase(
+                    eq("인생네컷"), any(org.springframework.data.domain.Pageable.class)))
+                    .willReturn(page);
+
+            // when
+            PagedResponseDto<PhotoBoothResponseDto> result =
+                    photoBoothService.getPhotoBoothsByBrandPaged("인생네컷", 0, 20);
+
+            // then
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getTotalElements()).isEqualTo(1);
         }
     }
 

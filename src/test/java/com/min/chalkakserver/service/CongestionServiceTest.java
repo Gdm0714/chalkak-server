@@ -154,6 +154,86 @@ class CongestionServiceTest {
         assertThat(response.getSubmittedAt()).isNotNull();
     }
 
+    @Test
+    @DisplayName("제보가 6건 이상이면 HIGH 신뢰도를 반환한다")
+    void getCurrentCongestion_HighConfidence() {
+        given(photoBoothRepository.findById(1L)).willReturn(Optional.of(photoBooth));
+
+        // 6건의 RELAXED 제보 생성
+        java.util.List<CongestionReport> reports = new java.util.ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            CongestionReport r = CongestionReport.builder()
+                    .user(user)
+                    .photoBooth(photoBooth)
+                    .congestionLevel(CongestionReport.CongestionLevel.RELAXED)
+                    .build();
+            setCreatedAt(r, LocalDateTime.now().minusMinutes(i * 5));
+            reports.add(r);
+        }
+
+        given(congestionReportRepository.findByPhotoBoothAndCreatedAtAfterOrderByCreatedAtDesc(any(), any()))
+                .willReturn(reports);
+
+        CongestionResponseDto result = congestionService.getCurrentCongestion(1L);
+
+        assertThat(result.getConfidenceLevel()).isEqualTo(CongestionResponseDto.ConfidenceLevel.HIGH);
+        assertThat(result.getSampleSize()).isEqualTo(6);
+    }
+
+    @Test
+    @DisplayName("제보가 3-5건이면 MEDIUM 신뢰도를 반환한다")
+    void getCurrentCongestion_MediumConfidence() {
+        given(photoBoothRepository.findById(1L)).willReturn(Optional.of(photoBooth));
+
+        java.util.List<CongestionReport> reports = new java.util.ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            CongestionReport r = CongestionReport.builder()
+                    .user(user)
+                    .photoBooth(photoBooth)
+                    .congestionLevel(CongestionReport.CongestionLevel.NORMAL)
+                    .build();
+            setCreatedAt(r, LocalDateTime.now().minusMinutes(i * 5));
+            reports.add(r);
+        }
+
+        given(congestionReportRepository.findByPhotoBoothAndCreatedAtAfterOrderByCreatedAtDesc(any(), any()))
+                .willReturn(reports);
+
+        CongestionResponseDto result = congestionService.getCurrentCongestion(1L);
+
+        assertThat(result.getConfidenceLevel()).isEqualTo(CongestionResponseDto.ConfidenceLevel.MEDIUM);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 포토부스의 혼잡도를 조회하면 예외가 발생한다")
+    void getCurrentCongestion_PhotoBoothNotFound() {
+        given(photoBoothRepository.findById(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> congestionService.getCurrentCongestion(999L))
+                .isInstanceOf(com.min.chalkakserver.exception.PhotoBoothNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자가 제보하면 예외가 발생한다")
+    void submitReport_UserNotFound() {
+        CongestionReportRequestDto request = buildRequest(CongestionReport.CongestionLevel.NORMAL);
+        given(userRepository.findById(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> congestionService.submitReport(999L, 1L, request))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 포토부스에 제보하면 예외가 발생한다")
+    void submitReport_PhotoBoothNotFound() {
+        CongestionReportRequestDto request = buildRequest(CongestionReport.CongestionLevel.NORMAL);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(photoBoothRepository.findById(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> congestionService.submitReport(1L, 999L, request))
+                .isInstanceOf(com.min.chalkakserver.exception.PhotoBoothNotFoundException.class);
+    }
+
     private CongestionReportRequestDto buildRequest(CongestionReport.CongestionLevel level) {
         CongestionReportRequestDto request = new CongestionReportRequestDto();
         try {
