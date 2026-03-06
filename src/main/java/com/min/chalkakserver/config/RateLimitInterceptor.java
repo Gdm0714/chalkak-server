@@ -65,17 +65,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
      * 프록시/로드밸런서 뒤에 있는 경우 X-Forwarded-For 헤더 확인
      */
     private String getClientIP(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            // 첫 번째 IP가 실제 클라이언트 IP
-            return xForwardedFor.split(",")[0].trim();
-        }
-        
-        String xRealIP = request.getHeader("X-Real-IP");
-        if (xRealIP != null && !xRealIP.isEmpty()) {
-            return xRealIP;
-        }
-        
+        // remoteAddr를 기본으로 사용 (X-Forwarded-For 스푸핑 방지)
+        // 프록시/로드밸런서 뒤에서는 Spring의 server.tomcat.remoteip.internal-proxies 설정으로
+        // 신뢰할 수 있는 프록시에서만 X-Forwarded-For를 반영하도록 설정해야 함
         return request.getRemoteAddr();
     }
 }

@@ -22,4 +22,6 @@ public interface CongestionReportRepository extends JpaRepository<CongestionRepo
             PhotoBooth photoBooth,
             LocalDateTime createdAt
     );
+
+    void deleteAllByUser(User user);
 }

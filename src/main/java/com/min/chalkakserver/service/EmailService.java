@@ -37,7 +37,7 @@ public class EmailService {
 
             mailSender.send(message);
             log.info("제보 이메일 전송 성공: {}", escapeForLog(reportDto.getName()));
-        } catch (MessagingException e) {
+        } catch (MessagingException | RuntimeException e) {
             // @Async 메서드에서는 예외를 던져도 호출자에게 전달되지 않으므로 로깅만 수행
             log.error("이메일 전송 실패: {}", escapeForLog(reportDto.getName()), e);
         }

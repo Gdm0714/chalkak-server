@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.Claims;
+
 import java.io.IOException;
 
 @Slf4j
@@ -35,6 +37,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = resolveToken(request);
 
             if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
+                // Refresh token은 API 접근에 사용할 수 없음
+                Claims claims = jwtTokenProvider.getClaimsFromToken(jwt);
+                String tokenType = claims.get("type", String.class);
+                if ("refresh".equals(tokenType)) {
+                    log.warn("Refresh token used as access token - rejected");
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 Long userId = jwtTokenProvider.getUserIdFromToken(jwt);
                 CustomUserDetails userDetails = authService.loadUserById(userId);
 

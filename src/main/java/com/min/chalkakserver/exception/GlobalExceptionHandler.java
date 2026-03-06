@@ -302,6 +302,25 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * DB 유니크 제약 위반 (동시 요청에 의한 중복 생성)
+     */
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(
+            org.springframework.dao.DataIntegrityViolationException ex, HttpServletRequest request) {
+
+        log.error("Data integrity violation: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.CONFLICT.value(),
+            "Conflict",
+            "이미 처리된 요청입니다. 중복 데이터가 존재합니다.",
+            request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    /**
      * 기타 모든 예외
      */
     @ExceptionHandler(Exception.class)

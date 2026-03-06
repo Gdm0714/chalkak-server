@@ -22,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/photo-booths")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Validated
 public class PhotoBoothController {
     

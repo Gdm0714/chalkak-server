@@ -26,6 +26,9 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final com.min.chalkakserver.repository.ReviewRepository reviewRepository;
+    private final com.min.chalkakserver.repository.FavoriteRepository favoriteRepository;
+    private final com.min.chalkakserver.repository.CongestionReportRepository congestionReportRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final SocialAuthService socialAuthService;
     private final PasswordEncoder passwordEncoder;
@@ -169,13 +172,18 @@ public class AuthService {
     public void deleteAccount(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException("User not found"));
-        
+
+        // 연관 데이터 먼저 삭제 (FK 제약 방지)
+        reviewRepository.deleteAllByUser(user);
+        favoriteRepository.deleteAllByUser(user);
+        congestionReportRepository.deleteAllByUser(user);
+
         // Refresh Token 모두 삭제
         refreshTokenRepository.deleteAllByUser(user);
-        
+
         // 사용자 삭제
         userRepository.delete(user);
-        
+
         log.info("User account deleted: userId={}", userId);
     }
 

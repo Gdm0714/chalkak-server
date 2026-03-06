@@ -96,7 +96,9 @@ public class PhotoBoothService {
         @CacheEvict(value = "photoBooths", allEntries = true),
         @CacheEvict(value = "nearbyPhotoBooths", allEntries = true),
         @CacheEvict(value = "searchResults", allEntries = true),
-        @CacheEvict(value = "brandPhotoBooths", allEntries = true)
+        @CacheEvict(value = "brandPhotoBooths", allEntries = true),
+        @CacheEvict(value = "brandSeriesPhotoBooths", allEntries = true),
+        @CacheEvict(value = "seriesPhotoBooths", allEntries = true)
     })
     public PhotoBoothResponseDto createPhotoBooth(PhotoBoothRequestDto requestDto) {
         log.info("네컷사진관 생성 - 이름: {}", requestDto.getName());
@@ -116,7 +118,9 @@ public class PhotoBoothService {
         @CacheEvict(value = "photoBooth", key = "#id"),
         @CacheEvict(value = "nearbyPhotoBooths", allEntries = true),
         @CacheEvict(value = "searchResults", allEntries = true),
-        @CacheEvict(value = "brandPhotoBooths", allEntries = true)
+        @CacheEvict(value = "brandPhotoBooths", allEntries = true),
+        @CacheEvict(value = "brandSeriesPhotoBooths", allEntries = true),
+        @CacheEvict(value = "seriesPhotoBooths", allEntries = true)
     })
     public PhotoBoothResponseDto updatePhotoBooth(Long id, PhotoBoothRequestDto requestDto) {
         log.info("네컷사진관 수정 - ID: {}", id);
@@ -149,7 +153,9 @@ public class PhotoBoothService {
         @CacheEvict(value = "photoBooth", key = "#id"),
         @CacheEvict(value = "nearbyPhotoBooths", allEntries = true),
         @CacheEvict(value = "searchResults", allEntries = true),
-        @CacheEvict(value = "brandPhotoBooths", allEntries = true)
+        @CacheEvict(value = "brandPhotoBooths", allEntries = true),
+        @CacheEvict(value = "brandSeriesPhotoBooths", allEntries = true),
+        @CacheEvict(value = "seriesPhotoBooths", allEntries = true)
     })
     public void deletePhotoBooth(Long id) {
         log.info("네컷사진관 삭제 - ID: {}", id);
