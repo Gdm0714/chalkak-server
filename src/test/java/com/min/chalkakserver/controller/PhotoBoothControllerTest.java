@@ -93,4 +93,134 @@ class PhotoBoothControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
     }
+
+    @Test
+    void getAllPhotoBooths_ShouldReturn200() throws Exception {
+        when(photoBoothService.getAllPhotoBooths()).thenReturn(java.util.List.of());
+
+        mockMvc.perform(get("/api/photo-booths"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getAllPhotoBoothsPaged_ShouldReturn200() throws Exception {
+        com.min.chalkakserver.dto.PagedResponseDto<com.min.chalkakserver.dto.PhotoBoothResponseDto> pagedResponse =
+                com.min.chalkakserver.dto.PagedResponseDto.of(java.util.List.of());
+        when(photoBoothService.getAllPhotoBoothsPaged(0, 20)).thenReturn(pagedResponse);
+
+        mockMvc.perform(get("/api/photo-booths/paged")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray());
+    }
+
+    @Test
+    void getPhotoBoothById_Success_ShouldReturn200() throws Exception {
+        com.min.chalkakserver.dto.PhotoBoothResponseDto dto = com.min.chalkakserver.dto.PhotoBoothResponseDto.builder()
+                .id(1L)
+                .name("테스트 사진관")
+                .brand("인생네컷")
+                .address("서울시 강남구")
+                .build();
+        when(photoBoothService.getPhotoBoothById(1L)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/photo-booths/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("테스트 사진관"));
+    }
+
+    @Test
+    void searchPhotoBooths_ShouldReturn200() throws Exception {
+        when(photoBoothService.searchPhotoBooths("강남")).thenReturn(java.util.List.of());
+
+        mockMvc.perform(get("/api/photo-booths/search")
+                        .param("keyword", "강남"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void searchPhotoBoothsPaged_ShouldReturn200() throws Exception {
+        com.min.chalkakserver.dto.PagedResponseDto<com.min.chalkakserver.dto.PhotoBoothResponseDto> pagedResponse =
+                com.min.chalkakserver.dto.PagedResponseDto.of(java.util.List.of());
+        when(photoBoothService.searchPhotoBoothsPaged("강남", 0, 20)).thenReturn(pagedResponse);
+
+        mockMvc.perform(get("/api/photo-booths/search/paged")
+                        .param("keyword", "강남")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray());
+    }
+
+    @Test
+    void getPhotoBoothsByBrand_ShouldReturn200() throws Exception {
+        when(photoBoothService.getPhotoBoothsByBrand("인생네컷")).thenReturn(java.util.List.of());
+
+        mockMvc.perform(get("/api/photo-booths/brand/{brand}", "인생네컷"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getPhotoBoothsByBrandPaged_ShouldReturn200() throws Exception {
+        com.min.chalkakserver.dto.PagedResponseDto<com.min.chalkakserver.dto.PhotoBoothResponseDto> pagedResponse =
+                com.min.chalkakserver.dto.PagedResponseDto.of(java.util.List.of());
+        when(photoBoothService.getPhotoBoothsByBrandPaged("인생네컷", 0, 20)).thenReturn(pagedResponse);
+
+        mockMvc.perform(get("/api/photo-booths/brand/{brand}/paged", "인생네컷")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray());
+    }
+
+    @Test
+    void getPhotoBoothsByBrandAndSeries_ShouldReturn200() throws Exception {
+        when(photoBoothService.getPhotoBoothsByBrandAndSeries("인생네컷", "컬러")).thenReturn(java.util.List.of());
+
+        mockMvc.perform(get("/api/photo-booths/brand/{brand}/series/{series}", "인생네컷", "컬러"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getPhotoBoothsBySeries_ShouldReturn200() throws Exception {
+        when(photoBoothService.getPhotoBoothsBySeries("오리지널")).thenReturn(java.util.List.of());
+
+        mockMvc.perform(get("/api/photo-booths/series/{series}", "오리지널"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getNearbyPhotoBooths_ValidCoordinates_ShouldReturn200() throws Exception {
+        when(photoBoothService.getNearbyPhotoBooths(37.5, 127.0, 3.0)).thenReturn(java.util.List.of());
+
+        mockMvc.perform(get("/api/photo-booths/nearby")
+                        .param("latitude", "37.5")
+                        .param("longitude", "127.0")
+                        .param("radius", "3.0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void reportPhotoBooth_ValidInput_ShouldReturn200() throws Exception {
+        com.min.chalkakserver.dto.PhotoBoothReportDto reportDto = com.min.chalkakserver.dto.PhotoBoothReportDto.builder()
+                .name("새 사진관")
+                .address("서울시 강남구")
+                .latitude(37.5)
+                .longitude(127.0)
+                .build();
+
+        mockMvc.perform(post("/api/photo-booths/report")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reportDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("제보가 접수되었습니다. 감사합니다!"));
+    }
 }
