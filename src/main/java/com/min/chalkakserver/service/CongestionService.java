@@ -28,6 +28,7 @@ public class CongestionService {
 
     private static final int AGGREGATION_WINDOW_MINUTES = 60;
     private static final int REPORT_COOLDOWN_MINUTES = 60;
+    private static final double MAX_REPORT_DISTANCE_METERS = 500.0;
 
     private final CongestionReportRepository congestionReportRepository;
     private final PhotoBoothRepository photoBoothRepository;
@@ -96,6 +97,16 @@ public class CongestionService {
         PhotoBooth photoBooth = photoBoothRepository.findById(photoBoothId)
                 .orElseThrow(() -> new PhotoBoothNotFoundException(photoBoothId));
 
+        double distance = calculateDistanceInMeters(
+                request.getLatitude(), request.getLongitude(),
+                photoBooth.getLatitude(), photoBooth.getLongitude()
+        );
+        if (distance > MAX_REPORT_DISTANCE_METERS) {
+            throw new IllegalArgumentException(
+                    String.format("매장에서 너무 멀리 있습니다. (%.0fm) 매장 근처에서 제보해주세요.", distance)
+            );
+        }
+
         LocalDateTime cooldownCutoff = LocalDateTime.now().minusMinutes(REPORT_COOLDOWN_MINUTES);
         boolean alreadyReported = congestionReportRepository.existsByUserAndPhotoBoothAndCreatedAtAfter(
                 user, photoBooth, cooldownCutoff
@@ -120,6 +131,17 @@ public class CongestionService {
                 .message("혼잡도 제보가 반영되었습니다.")
                 .submittedAt(saved.getCreatedAt())
                 .build();
+    }
+
+    private double calculateDistanceInMeters(double lat1, double lon1, double lat2, double lon2) {
+        final double R = 6371000; // Earth radius in meters
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 
     private double calculateWeightedScore(List<CongestionReport> reports) {
