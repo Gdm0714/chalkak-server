@@ -28,6 +28,7 @@ public class CongestionService {
 
     private static final int AGGREGATION_WINDOW_MINUTES = 60;
     private static final int REPORT_COOLDOWN_MINUTES = 60;
+    private static final double MAX_REPORT_DISTANCE_METERS = 500.0;
 
     private final CongestionReportRepository congestionReportRepository;
     private final PhotoBoothRepository photoBoothRepository;
@@ -70,11 +71,40 @@ public class CongestionService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public List<CongestionResponseDto> getBatchCongestion(List<Long> photoBoothIds) {
+        return photoBoothIds.stream().map(photoBoothId -> {
+            try {
+                return getCurrentCongestion(photoBoothId);
+            } catch (Exception e) {
+                log.warn("Failed to get congestion for photoBoothId={}: {}", photoBoothId, e.getMessage());
+                return CongestionResponseDto.builder()
+                        .photoBoothId(photoBoothId)
+                        .congestionLevel(CongestionReport.CongestionLevel.UNKNOWN)
+                        .confidenceLevel(CongestionResponseDto.ConfidenceLevel.LOW)
+                        .sampleSize(0)
+                        .message("혼잡도 정보를 불러올 수 없습니다.")
+                        .build();
+            }
+        }).toList();
+    }
+
     public CongestionReportResponseDto submitReport(Long userId, Long photoBoothId, CongestionReportRequestDto request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         PhotoBooth photoBooth = photoBoothRepository.findById(photoBoothId)
                 .orElseThrow(() -> new PhotoBoothNotFoundException(photoBoothId));
+
+        // GPS 거리 검증
+        double distance = calculateDistanceInMeters(
+            request.getLatitude(), request.getLongitude(),
+            photoBooth.getLatitude(), photoBooth.getLongitude()
+        );
+        if (distance > MAX_REPORT_DISTANCE_METERS) {
+            throw new IllegalArgumentException(
+                String.format("매장에서 너무 멀리 있습니다. (%.0fm) 매장 근처에서 제보해주세요.", distance)
+            );
+        }
 
         LocalDateTime cooldownCutoff = LocalDateTime.now().minusMinutes(REPORT_COOLDOWN_MINUTES);
         boolean alreadyReported = congestionReportRepository.existsByUserAndPhotoBoothAndCreatedAtAfter(
@@ -100,6 +130,17 @@ public class CongestionService {
                 .message("혼잡도 제보가 반영되었습니다.")
                 .submittedAt(saved.getCreatedAt())
                 .build();
+    }
+
+    private double calculateDistanceInMeters(double lat1, double lon1, double lat2, double lon2) {
+        final double R = 6371000;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 
     private double calculateWeightedScore(List<CongestionReport> reports) {
