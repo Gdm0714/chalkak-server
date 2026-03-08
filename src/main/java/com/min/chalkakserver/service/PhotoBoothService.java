@@ -22,6 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.min.chalkakserver.dto.PhotoBoothReportDto;
+import com.min.chalkakserver.dto.PhotoBoothReportResponseDto;
+import com.min.chalkakserver.entity.PhotoBoothReport;
+import com.min.chalkakserver.entity.User;
+import com.min.chalkakserver.exception.AuthException;
+import com.min.chalkakserver.repository.PhotoBoothReportRepository;
+import com.min.chalkakserver.repository.UserRepository;
+
 @Slf4j
 @Service
 @Transactional
@@ -29,6 +37,8 @@ import java.util.stream.Collectors;
 public class PhotoBoothService {
     
     private final PhotoBoothRepository photoBoothRepository;
+    private final PhotoBoothReportRepository photoBoothReportRepository;
+    private final UserRepository userRepository;
     
     // 모든 네컷사진관 조회
     @Transactional(readOnly = true)
@@ -245,5 +255,59 @@ public class PhotoBoothService {
         if (radius <= 0 || radius > 50) {
             throw new InvalidLocationException("검색 반경은 0km 초과 50km 이하여야 합니다. 입력값: " + radius);
         }
+    }
+
+    // 브랜드 목록 조회
+    @Transactional(readOnly = true)
+    public List<String> getDistinctBrands() {
+        log.info("브랜드 목록 조회");
+        return photoBoothRepository.findDistinctBrands();
+    }
+
+    // 인기 네컷사진관 조회
+    @Transactional(readOnly = true)
+    public List<PhotoBoothResponseDto> getPopularPhotoBooths(int limit) {
+        log.info("인기 네컷사진관 조회 - limit: {}", limit);
+        return photoBoothRepository.findPopularPhotoBooths(limit)
+                .stream()
+                .map(PhotoBoothResponseDto::from)
+                .collect(Collectors.toList());
+    }
+
+    // 사진관 제보 저장
+    @Transactional
+    public void saveReport(PhotoBoothReportDto reportDto, Long userId) {
+        User user = null;
+        if (userId != null) {
+            user = userRepository.findById(userId).orElse(null);
+        }
+
+        PhotoBoothReport report = PhotoBoothReport.builder()
+            .user(user)
+            .name(reportDto.getName())
+            .brand(reportDto.getBrand())
+            .series(reportDto.getSeries())
+            .address(reportDto.getAddress())
+            .roadAddress(reportDto.getRoadAddress())
+            .latitude(reportDto.getLatitude())
+            .longitude(reportDto.getLongitude())
+            .description(reportDto.getDescription())
+            .priceInfo(reportDto.getPriceInfo())
+            .reporterName(reportDto.getReporterName())
+            .reporterEmail(reportDto.getReporterEmail())
+            .build();
+
+        photoBoothReportRepository.save(report);
+        log.info("사진관 제보 저장 - 이름: {}, userId: {}", reportDto.getName(), userId);
+    }
+
+    // 내 제보 현황 조회
+    @Transactional(readOnly = true)
+    public List<PhotoBoothReportResponseDto> getMyReports(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException("User not found"));
+        return photoBoothReportRepository.findByUser(user).stream()
+            .map(PhotoBoothReportResponseDto::from)
+            .collect(Collectors.toList());
     }
 }

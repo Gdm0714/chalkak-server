@@ -4,10 +4,14 @@ import com.min.chalkakserver.dto.PagedResponseDto;
 import com.min.chalkakserver.dto.PhotoBoothReportDto;
 import com.min.chalkakserver.dto.PhotoBoothRequestDto;
 import com.min.chalkakserver.dto.PhotoBoothResponseDto;
+import com.min.chalkakserver.dto.PhotoBoothReportResponseDto;
+import com.min.chalkakserver.security.CustomUserDetails;
 import com.min.chalkakserver.service.EmailService;
 import com.min.chalkakserver.service.PhotoBoothService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -59,6 +63,21 @@ public class PhotoBoothController {
         return ResponseEntity.ok(nearbyBooths);
     }
     
+    @GetMapping("/brands")
+    @Operation(summary = "브랜드 목록", description = "중복 제거된 브랜드 목록을 조회합니다")
+    public ResponseEntity<List<String>> getDistinctBrands() {
+        List<String> brands = photoBoothService.getDistinctBrands();
+        return ResponseEntity.ok(brands);
+    }
+
+    @GetMapping("/popular")
+    @Operation(summary = "인기 네컷사진관", description = "리뷰가 많고 평점이 높은 네컷사진관 목록을 조회합니다")
+    public ResponseEntity<List<PhotoBoothResponseDto>> getPopularPhotoBooths(
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int limit) {
+        List<PhotoBoothResponseDto> popular = photoBoothService.getPopularPhotoBooths(limit);
+        return ResponseEntity.ok(popular);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PhotoBoothResponseDto> getPhotoBoothById(@PathVariable Long id) {
         PhotoBoothResponseDto photoBooth = photoBoothService.getPhotoBoothById(id);
@@ -123,8 +142,20 @@ public class PhotoBoothController {
     @PostMapping("/report")
     @Operation(summary = "네컷사진관 제보", description = "사용자가 새로운 네컷사진관 정보를 관리자에게 제보합니다")
     public ResponseEntity<Map<String, String>> reportPhotoBooth(
-        @Valid @RequestBody PhotoBoothReportDto reportDto) {
+        @Valid @RequestBody PhotoBoothReportDto reportDto,
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails != null ? userDetails.getId() : null;
+        photoBoothService.saveReport(reportDto, userId);
         emailService.sendPhotoBoothReport(reportDto);
         return ResponseEntity.ok(Map.of("message", "제보가 접수되었습니다. 감사합니다!"));
+    }
+
+    @GetMapping("/reports/my")
+    @Operation(summary = "내 제보 현황", description = "내가 제보한 사진관의 처리 상태를 조회합니다")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<List<PhotoBoothReportResponseDto>> getMyReports(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<PhotoBoothReportResponseDto> reports = photoBoothService.getMyReports(userDetails.getId());
+        return ResponseEntity.ok(reports);
     }
 }

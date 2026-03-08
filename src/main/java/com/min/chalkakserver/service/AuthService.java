@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -29,6 +30,7 @@ public class AuthService {
     private final com.min.chalkakserver.repository.ReviewRepository reviewRepository;
     private final com.min.chalkakserver.repository.FavoriteRepository favoriteRepository;
     private final com.min.chalkakserver.repository.CongestionReportRepository congestionReportRepository;
+    private final com.min.chalkakserver.repository.PhotoBoothReportRepository photoBoothReportRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final SocialAuthService socialAuthService;
     private final PasswordEncoder passwordEncoder;
@@ -177,6 +179,7 @@ public class AuthService {
         reviewRepository.deleteAllByUser(user);
         favoriteRepository.deleteAllByUser(user);
         congestionReportRepository.deleteAllByUser(user);
+        photoBoothReportRepository.deleteAllByUser(user);
 
         // Refresh Token 모두 삭제
         refreshTokenRepository.deleteAllByUser(user);
@@ -205,6 +208,23 @@ public class AuthService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new AuthException("User not found"));
         return UserResponseDto.from(user);
+    }
+
+    /**
+     * 사용자 활동 통계 조회
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getUserStats(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException("User not found"));
+
+        long reviewCount = reviewRepository.countByUser(user);
+        long favoriteCount = favoriteRepository.countByUser(user);
+
+        return Map.of(
+            "reviewCount", reviewCount,
+            "favoriteCount", favoriteCount
+        );
     }
 
     /**

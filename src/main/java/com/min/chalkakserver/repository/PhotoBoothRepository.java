@@ -60,6 +60,21 @@ public interface PhotoBoothRepository extends JpaRepository<PhotoBooth, Long> {
         @Param("maxLon") double maxLon
     );
     
+    // 브랜드 목록 (중복 제거)
+    @Query("SELECT DISTINCT pb.brand FROM PhotoBooth pb WHERE pb.brand IS NOT NULL AND pb.brand <> '' ORDER BY pb.brand")
+    List<String> findDistinctBrands();
+
+    // 인기 사진관 (리뷰 수 기준 정렬)
+    @Query(value = """
+        SELECT pb.* FROM photo_booths pb
+        LEFT JOIN reviews r ON pb.id = r.photo_booth_id
+        GROUP BY pb.id
+        HAVING COUNT(r.id) > 0
+        ORDER BY COUNT(r.id) DESC, AVG(r.rating) DESC
+        LIMIT :limit
+        """, nativeQuery = true)
+    List<PhotoBooth> findPopularPhotoBooths(@Param("limit") int limit);
+
     // 간단한 버전 - Point 타입 사용 시
     @Query(value = """
         SELECT *, ST_Distance_Sphere(

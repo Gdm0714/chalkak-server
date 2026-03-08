@@ -108,6 +108,15 @@ public class ReviewController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "최근 리뷰 피드", description = "최근 작성된 리뷰 목록 조회 (공개)")
+    @GetMapping("/recent")
+    public ResponseEntity<PagedResponseDto<ReviewResponseDto>> getRecentReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        PagedResponseDto<ReviewResponseDto> response = reviewService.getRecentReviews(page, size);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "특정 리뷰 조회", description = "리뷰 상세 조회")
     @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewResponseDto> getReview(

@@ -48,4 +48,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT COUNT(r) FROM Review r WHERE r.createdAt >= :dateTime")
     long countByCreatedAtAfter(@Param("dateTime") java.time.LocalDateTime dateTime);
+
+    @Query(value = "SELECT r FROM Review r JOIN FETCH r.user JOIN FETCH r.photoBooth ORDER BY r.createdAt DESC",
+           countQuery = "SELECT COUNT(r) FROM Review r")
+    Page<Review> findAllRecentWithUserAndPhotoBooth(Pageable pageable);
 }

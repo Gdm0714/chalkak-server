@@ -54,9 +54,13 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 // 인증 관련 엔드포인트 허용
                 .requestMatchers("/api/auth/login", "/api/auth/login/email", "/api/auth/register", "/api/auth/refresh", "/api/auth/logout").permitAll()
+                // 사진관 제보 현황은 인증 필요 (wildcard보다 먼저 선언)
+                .requestMatchers(HttpMethod.GET, "/api/photo-booths/reports/**").authenticated()
                 // 포토부스 조회 API는 인증 없이 허용 (GET만)
                 .requestMatchers(HttpMethod.GET, "/api/photo-booths/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/congestion/**").permitAll()
+                // 최근 리뷰 피드는 인증 없이 허용
+                .requestMatchers(HttpMethod.GET, "/api/reviews/recent").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/photo-booths/report").permitAll()
                 // 헬스체크 허용
                 .requestMatchers("/api/health").permitAll()

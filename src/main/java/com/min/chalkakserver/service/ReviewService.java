@@ -243,4 +243,29 @@ public class ReviewService {
             .map(ReviewResponseDto::from)
             .orElse(null);
     }
+
+    /**
+     * 최근 리뷰 목록 조회 (공개)
+     */
+    @Transactional(readOnly = true)
+    public PagedResponseDto<ReviewResponseDto> getRecentReviews(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Review> reviewPage = reviewRepository.findAllRecentWithUserAndPhotoBooth(pageable);
+
+        List<ReviewResponseDto> content = reviewPage.getContent().stream()
+            .map(ReviewResponseDto::from)
+            .collect(Collectors.toList());
+
+        return new PagedResponseDto<>(
+            content,
+            reviewPage.getNumber(),
+            reviewPage.getSize(),
+            reviewPage.getTotalElements(),
+            reviewPage.getTotalPages(),
+            reviewPage.isFirst(),
+            reviewPage.isLast(),
+            reviewPage.hasNext(),
+            reviewPage.hasPrevious()
+        );
+    }
 }

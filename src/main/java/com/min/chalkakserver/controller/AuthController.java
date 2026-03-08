@@ -80,6 +80,15 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "사용자 활동 통계", description = "리뷰 수, 즐겨찾기 수 등 활동 통계")
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/me/stats")
+    public ResponseEntity<Map<String, Object>> getUserStats(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Map<String, Object> stats = authService.getUserStats(userDetails.getId());
+        return ResponseEntity.ok(stats);
+    }
+
     @Operation(summary = "회원 탈퇴", description = "계정 삭제 (로그인 필요)")
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/withdraw")
