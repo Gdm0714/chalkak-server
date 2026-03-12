@@ -18,7 +18,7 @@ public class CacheService {
     @Autowired
     private CacheManager cacheManager;
     
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     public void evictCache(String cacheName) {
@@ -50,7 +50,7 @@ public class CacheService {
                 cacheStats.put("type", cache.getClass().getSimpleName());
                 
                 // Redis 통계 정보
-                Set<String> keys = redisTemplate.keys(cacheName + "::*");
+                Set<String> keys = redisTemplate != null ? redisTemplate.keys(cacheName + "::*") : null;
                 if (keys != null) {
                     cacheStats.put("size", keys.size());
                     cacheStats.put("keys", keys);
