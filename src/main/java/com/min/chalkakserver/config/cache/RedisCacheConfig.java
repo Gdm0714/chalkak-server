@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EnableCaching
 @Profile("!test")
 public class RedisCacheConfig implements CachingConfigurer {
     
