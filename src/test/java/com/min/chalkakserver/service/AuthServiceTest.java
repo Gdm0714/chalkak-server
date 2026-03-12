@@ -7,6 +7,7 @@ import com.min.chalkakserver.entity.User.AuthProvider;
 import com.min.chalkakserver.exception.AuthException;
 import com.min.chalkakserver.repository.CongestionReportRepository;
 import com.min.chalkakserver.repository.FavoriteRepository;
+import com.min.chalkakserver.repository.PhotoBoothReportRepository;
 import com.min.chalkakserver.repository.RefreshTokenRepository;
 import com.min.chalkakserver.repository.ReviewRepository;
 import com.min.chalkakserver.repository.UserRepository;
@@ -42,6 +43,7 @@ class AuthServiceTest {
     @Mock private ReviewRepository reviewRepository;
     @Mock private FavoriteRepository favoriteRepository;
     @Mock private CongestionReportRepository congestionReportRepository;
+    @Mock private PhotoBoothReportRepository photoBoothReportRepository;
     @Mock private JwtTokenProvider jwtTokenProvider;
     @Mock private SocialAuthService socialAuthService;
     @Mock private PasswordEncoder passwordEncoder;
@@ -363,10 +365,12 @@ class AuthServiceTest {
 
             // then - 순서 검증
             var inOrder = inOrder(reviewRepository, favoriteRepository,
-                    congestionReportRepository, refreshTokenRepository, userRepository);
+                    congestionReportRepository, photoBoothReportRepository,
+                    refreshTokenRepository, userRepository);
             inOrder.verify(reviewRepository).deleteAllByUser(testUser);
             inOrder.verify(favoriteRepository).deleteAllByUser(testUser);
             inOrder.verify(congestionReportRepository).deleteAllByUser(testUser);
+            inOrder.verify(photoBoothReportRepository).deleteAllByUser(testUser);
             inOrder.verify(refreshTokenRepository).deleteAllByUser(testUser);
             inOrder.verify(userRepository).delete(testUser);
         }

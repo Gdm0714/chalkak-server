@@ -132,6 +132,8 @@ class CongestionControllerTest {
     void submitCongestionReport_ValidRequest_ShouldReturn200() throws Exception {
         CongestionReportRequestDto request = CongestionReportRequestDto.builder()
                 .congestionLevel(CongestionReport.CongestionLevel.NORMAL)
+                .latitude(37.5665)
+                .longitude(126.9780)
                 .build();
 
         CongestionReportResponseDto response = CongestionReportResponseDto.builder()
@@ -164,6 +166,8 @@ class CongestionControllerTest {
     void submitCongestionReport_Duplicate_ShouldReturn409() throws Exception {
         CongestionReportRequestDto request = CongestionReportRequestDto.builder()
                 .congestionLevel(CongestionReport.CongestionLevel.BUSY)
+                .latitude(37.5665)
+                .longitude(126.9780)
                 .build();
 
         given(congestionService.submitReport(any(), eq(10L), any()))

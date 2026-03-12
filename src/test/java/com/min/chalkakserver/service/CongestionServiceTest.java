@@ -237,9 +237,18 @@ class CongestionServiceTest {
     private CongestionReportRequestDto buildRequest(CongestionReport.CongestionLevel level) {
         CongestionReportRequestDto request = new CongestionReportRequestDto();
         try {
-            Field field = CongestionReportRequestDto.class.getDeclaredField("congestionLevel");
-            field.setAccessible(true);
-            field.set(request, level);
+            Field congestionField = CongestionReportRequestDto.class.getDeclaredField("congestionLevel");
+            congestionField.setAccessible(true);
+            congestionField.set(request, level);
+
+            Field latField = CongestionReportRequestDto.class.getDeclaredField("latitude");
+            latField.setAccessible(true);
+            latField.set(request, 37.5);
+
+            Field lonField = CongestionReportRequestDto.class.getDeclaredField("longitude");
+            lonField.setAccessible(true);
+            lonField.set(request, 127.0);
+
             return request;
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
