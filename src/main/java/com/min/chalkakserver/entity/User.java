@@ -116,7 +116,7 @@ public class User {
     }
 
     public enum AuthProvider {
-        KAKAO, NAVER, APPLE, EMAIL
+        KAKAO, NAVER, APPLE, EMAIL, TOSS
     }
 
     public enum Role {

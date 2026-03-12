@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class SocialLoginRequestDto {
 
     @NotBlank(message = "Provider is required")
-    @Pattern(regexp = "^(kakao|naver|apple)$", message = "Provider must be kakao, naver, or apple")
+    @Pattern(regexp = "^(kakao|naver|apple|toss)$", message = "Provider must be kakao, naver, apple, or toss")
     private String provider;
 
     @NotBlank(message = "Access token is required")
