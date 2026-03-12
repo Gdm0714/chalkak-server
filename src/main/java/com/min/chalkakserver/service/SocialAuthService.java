@@ -47,6 +47,7 @@ public class SocialAuthService {
             case "kakao" -> getKakaoUserInfo(accessToken);
             case "naver" -> getNaverUserInfo(accessToken);
             case "apple" -> getAppleUserInfo(accessToken);
+            case "toss" -> getTossUserInfo(accessToken);
             default -> throw new AuthException("Unsupported provider: " + provider);
         };
     }
@@ -123,6 +124,42 @@ public class SocialAuthService {
         } catch (Exception e) {
             log.error("Failed to get Naver user info: {}", e.getMessage());
             throw new AuthException("Failed to get Naver user info");
+        }
+    }
+
+    /**
+     * 토스 앱인토스 사용자 정보 처리
+     * 앱인토스 미니앱은 토스 앱 내에서만 실행되며, mTLS로 통신이 보호됩니다.
+     * accessToken 필드에 JSON 형태의 토스 사용자 정보를 전달받습니다.
+     * 형식: {"userId":"toss-user-id","name":"이름","profileImageUrl":"url"}
+     */
+    private SocialUserInfo getTossUserInfo(String tossUserData) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(tossUserData);
+
+            String id = jsonNode.get("userId").asText();
+            if (id == null || id.isBlank()) {
+                throw new AuthException("Toss userId is required");
+            }
+
+            String name = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
+            String profileImageUrl = jsonNode.has("profileImageUrl")
+                ? jsonNode.get("profileImageUrl").asText() : null;
+
+            log.info("Toss user info retrieved: id={}", id);
+
+            return SocialUserInfo.builder()
+                .id(id)
+                .email(null)  // 토스는 이메일을 제공하지 않음
+                .nickname(name)
+                .profileImageUrl(profileImageUrl)
+                .build();
+
+        } catch (AuthException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to parse Toss user info: {}", e.getMessage());
+            throw new AuthException("Failed to parse Toss user info");
         }
     }
 
