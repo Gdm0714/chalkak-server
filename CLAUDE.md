@@ -13,7 +13,7 @@
 - **Docs**: SpringDoc OpenAPI 2.7.0 (Swagger UI)
 - **Mail**: Spring Mail (Gmail SMTP)
 - **Build**: Gradle 8.x
-- **Deploy**: GitHub Actions → EC2 (JAR 직접 배포)
+- **Deploy**: GitHub Actions → EC2 t4g.medium (Docker Compose, Caddy 자동 HTTPS)
 
 ---
 
