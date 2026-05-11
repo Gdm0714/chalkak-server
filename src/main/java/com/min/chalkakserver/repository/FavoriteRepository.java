@@ -35,4 +35,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
     @Query("SELECT COUNT(f) FROM Favorite f WHERE f.user = :user")
     long countByUser(@Param("user") User user);
+
+    @Query("SELECT DISTINCT f.user FROM Favorite f WHERE f.photoBooth.id = :photoBoothId")
+    List<User> findUsersByPhotoBoothId(@Param("photoBoothId") Long photoBoothId);
 }

@@ -1,16 +1,20 @@
 package com.min.chalkakserver.controller;
 
 import com.min.chalkakserver.dto.PagedResponseDto;
+import com.min.chalkakserver.dto.PhotoBoothImageDto;
 import com.min.chalkakserver.dto.PhotoBoothReportDto;
 import com.min.chalkakserver.dto.PhotoBoothRequestDto;
 import com.min.chalkakserver.dto.PhotoBoothResponseDto;
 import com.min.chalkakserver.dto.PhotoBoothReportResponseDto;
+import com.min.chalkakserver.entity.PhotoBoothImage;
 import com.min.chalkakserver.security.CustomUserDetails;
 import com.min.chalkakserver.service.EmailService;
+import com.min.chalkakserver.service.PhotoBoothImageService;
 import com.min.chalkakserver.service.PhotoBoothService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -20,7 +24,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -30,7 +36,7 @@ import java.util.List;
 public class PhotoBoothController {
     
     private final PhotoBoothService photoBoothService;
-
+    private final PhotoBoothImageService photoBoothImageService;
     private final EmailService emailService;
     
     @GetMapping
@@ -157,5 +163,35 @@ public class PhotoBoothController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<PhotoBoothReportResponseDto> reports = photoBoothService.getMyReports(userDetails.getId());
         return ResponseEntity.ok(reports);
+    }
+
+    // ==================== 이미지 ====================
+
+    @GetMapping("/{id}/images")
+    @Operation(summary = "사진관 이미지 목록", description = "사진관의 이미지 목록을 조회합니다")
+    public ResponseEntity<List<PhotoBoothImageDto>> getImages(@PathVariable Long id) {
+        return ResponseEntity.ok(photoBoothImageService.getImages(id));
+    }
+
+    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "사진관 이미지 업로드", description = "사진관에 이미지를 업로드합니다")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<PhotoBoothImageDto> uploadImage(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(defaultValue = "EXTERIOR") PhotoBoothImage.ImageType imageType,
+            @RequestParam(defaultValue = "0") Integer displayOrder) throws IOException {
+        PhotoBoothImageDto result = photoBoothImageService.uploadImage(id, file, imageType, displayOrder);
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{id}/images/{imageId}")
+    @Operation(summary = "사진관 이미지 삭제", description = "사진관 이미지를 삭제합니다")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<Map<String, String>> deleteImage(
+            @PathVariable Long id,
+            @PathVariable Long imageId) {
+        photoBoothImageService.deleteImage(id, imageId);
+        return ResponseEntity.ok(Map.of("message", "이미지가 삭제되었습니다."));
     }
 }

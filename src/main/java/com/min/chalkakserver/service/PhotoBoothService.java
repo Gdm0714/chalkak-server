@@ -1,11 +1,13 @@
 package com.min.chalkakserver.service;
 
 import com.min.chalkakserver.dto.PagedResponseDto;
+import com.min.chalkakserver.dto.PhotoBoothImageDto;
 import com.min.chalkakserver.dto.PhotoBoothRequestDto;
 import com.min.chalkakserver.dto.PhotoBoothResponseDto;
 import com.min.chalkakserver.entity.PhotoBooth;
 import com.min.chalkakserver.exception.InvalidLocationException;
 import com.min.chalkakserver.exception.PhotoBoothNotFoundException;
+import com.min.chalkakserver.repository.PhotoBoothImageRepository;
 import com.min.chalkakserver.repository.PhotoBoothRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ import com.min.chalkakserver.repository.UserRepository;
 public class PhotoBoothService {
     
     private final PhotoBoothRepository photoBoothRepository;
+    private final PhotoBoothImageRepository photoBoothImageRepository;
     private final PhotoBoothReportRepository photoBoothReportRepository;
     private final UserRepository userRepository;
     
@@ -70,7 +73,12 @@ public class PhotoBoothService {
         log.info("ID {} 로 네컷사진관 조회 - DB에서 데이터 조회", id);
         PhotoBooth photoBooth = photoBoothRepository.findById(id)
                 .orElseThrow(() -> new PhotoBoothNotFoundException(id));
-        return PhotoBoothResponseDto.from(photoBooth);
+        List<PhotoBoothImageDto> images = photoBoothImageRepository
+                .findByPhotoBoothIdOrderByDisplayOrder(id)
+                .stream()
+                .map(PhotoBoothImageDto::from)
+                .collect(Collectors.toList());
+        return PhotoBoothResponseDto.from(photoBooth, images);
     }
     
     // 근처 네컷사진관 검색

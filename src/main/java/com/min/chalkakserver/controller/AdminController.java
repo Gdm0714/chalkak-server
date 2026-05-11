@@ -6,6 +6,7 @@ import com.min.chalkakserver.dto.PhotoBoothResponseDto;
 import com.min.chalkakserver.dto.admin.AdminStatsDto;
 import com.min.chalkakserver.dto.admin.UserListResponseDto;
 import com.min.chalkakserver.service.AdminService;
+import com.min.chalkakserver.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Tag(name = "Admin", description = "관리자 API")
 @RestController
@@ -26,6 +29,7 @@ import java.util.Map;
 public class AdminController {
 
     private final AdminService adminService;
+    private final TagService tagService;
 
     // ==================== 대시보드 ====================
 
@@ -103,5 +107,36 @@ public class AdminController {
     public ResponseEntity<Map<String, String>> deleteReview(@PathVariable Long reviewId) {
         adminService.deleteReview(reviewId);
         return ResponseEntity.ok(Map.of("message", "리뷰가 삭제되었습니다."));
+    }
+
+    // ==================== 태그 관리 ====================
+
+    @Operation(summary = "태그 목록", description = "전체 태그 목록 조회")
+    @GetMapping("/tags")
+    public ResponseEntity<List<com.min.chalkakserver.entity.Tag>> getTags() {
+        return ResponseEntity.ok(tagService.getAllTags());
+    }
+
+    @Operation(summary = "태그 생성", description = "새 태그 생성")
+    @PostMapping("/tags")
+    public ResponseEntity<com.min.chalkakserver.entity.Tag> createTag(@RequestBody Map<String, String> body) {
+        String name = body.get("name");
+        return ResponseEntity.ok(tagService.createTag(name));
+    }
+
+    @Operation(summary = "태그 삭제", description = "태그 삭제")
+    @DeleteMapping("/tags/{id}")
+    public ResponseEntity<Map<String, String>> deleteTag(@PathVariable Long id) {
+        tagService.deleteTag(id);
+        return ResponseEntity.ok(Map.of("message", "태그가 삭제되었습니다."));
+    }
+
+    @Operation(summary = "사진관 태그 설정", description = "사진관에 태그 일괄 설정")
+    @PutMapping("/photo-booths/{id}/tags")
+    public ResponseEntity<Map<String, String>> setPhotoBoothTags(
+            @PathVariable Long id,
+            @RequestBody Set<String> tagNames) {
+        tagService.setPhotoBoothTags(id, tagNames);
+        return ResponseEntity.ok(Map.of("message", "태그가 설정되었습니다."));
     }
 }

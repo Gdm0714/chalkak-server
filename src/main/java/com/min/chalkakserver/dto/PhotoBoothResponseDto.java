@@ -4,6 +4,8 @@ import com.min.chalkakserver.entity.PhotoBooth;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -23,8 +25,13 @@ public class PhotoBoothResponseDto {
     private String priceInfo;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    
+    private List<PhotoBoothImageDto> images;
+    private List<String> tags;
+
     public static PhotoBoothResponseDto from(PhotoBooth photoBooth) {
+        List<String> tagNames = photoBooth.getTags() != null
+                ? photoBooth.getTags().stream().map(t -> t.getName()).collect(Collectors.toList())
+                : List.of();
         return PhotoBoothResponseDto.builder()
                 .id(photoBooth.getId())
                 .name(photoBooth.getName())
@@ -38,6 +45,30 @@ public class PhotoBoothResponseDto {
                 .priceInfo(photoBooth.getPriceInfo())
                 .createdAt(photoBooth.getCreatedAt())
                 .updatedAt(photoBooth.getUpdatedAt())
+                .images(List.of())
+                .tags(tagNames)
+                .build();
+    }
+
+    public static PhotoBoothResponseDto from(PhotoBooth photoBooth, List<PhotoBoothImageDto> images) {
+        List<String> tagNames = photoBooth.getTags() != null
+                ? photoBooth.getTags().stream().map(t -> t.getName()).collect(Collectors.toList())
+                : List.of();
+        return PhotoBoothResponseDto.builder()
+                .id(photoBooth.getId())
+                .name(photoBooth.getName())
+                .brand(photoBooth.getBrand())
+                .series(photoBooth.getSeries())
+                .address(photoBooth.getAddress())
+                .roadAddress(photoBooth.getRoadAddress())
+                .latitude(photoBooth.getLatitude())
+                .longitude(photoBooth.getLongitude())
+                .description(photoBooth.getDescription())
+                .priceInfo(photoBooth.getPriceInfo())
+                .createdAt(photoBooth.getCreatedAt())
+                .updatedAt(photoBooth.getUpdatedAt())
+                .images(images)
+                .tags(tagNames)
                 .build();
     }
     
@@ -55,5 +86,7 @@ public class PhotoBoothResponseDto {
         this.priceInfo = photoBooth.getPriceInfo();
         this.createdAt = photoBooth.getCreatedAt();
         this.updatedAt = photoBooth.getUpdatedAt();
+        this.images = List.of();
+        this.tags = List.of();
     }
 }

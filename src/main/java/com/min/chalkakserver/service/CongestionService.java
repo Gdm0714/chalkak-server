@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -33,6 +35,10 @@ public class CongestionService {
     private final CongestionReportRepository congestionReportRepository;
     private final PhotoBoothRepository photoBoothRepository;
     private final UserRepository userRepository;
+
+    @Lazy
+    @Autowired
+    private NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public CongestionResponseDto getCurrentCongestion(Long photoBoothId) {
@@ -124,6 +130,13 @@ public class CongestionService {
         CongestionReport saved = congestionReportRepository.save(report);
         log.info("Congestion report submitted: userId={}, photoBoothId={}, level={}",
                 userId, photoBoothId, request.getCongestionLevel());
+
+        String boothName = photoBooth.getName();
+        notificationService.notifyFavoriteUsers(
+                photoBoothId,
+                boothName + " 혼잡도 업데이트",
+                "즐겨찾기한 " + boothName + "의 혼잡도가 " + request.getCongestionLevel().name() + "으로 업데이트되었습니다."
+        );
 
         return CongestionReportResponseDto.builder()
                 .photoBoothId(photoBoothId)

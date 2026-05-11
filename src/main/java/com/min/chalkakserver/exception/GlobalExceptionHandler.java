@@ -175,6 +175,29 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * 게시물을 찾을 수 없는 경우
+     */
+    @ExceptionHandler(PostNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePostNotFoundException(
+            PostNotFoundException ex, HttpServletRequest request) {
+
+        log.error("Post not found: {}", ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("postId", ex.getPostId());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
      * 리뷰를 찾을 수 없는 경우
      */
     @ExceptionHandler(ReviewNotFoundException.class)

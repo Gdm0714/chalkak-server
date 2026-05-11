@@ -2,7 +2,7 @@ spring:
   # JPA/Hibernate Configuration for Production
   jpa:
     hibernate:
-      ddl-auto: validate  # 프로덕션에서는 validate 사용 (스키마 변경 방지)
+      ddl-auto: ${DDL_AUTO:validate}  # 빈 DB 첫 배포 시 update, 안정화 후 validate
     show-sql: false
     properties:
       hibernate:
@@ -19,7 +19,7 @@ logging:
     com.min.chalkakserver: INFO
     org.hibernate.SQL: WARN
 
-# Actuator - 프로덕션에서는 보안 강화
+# Actuator
 management:
   endpoints:
     web:
@@ -27,4 +27,11 @@ management:
         include: health,info
   endpoint:
     health:
-      show-details: never  # 프로덕션에서는 상세 정보 숨김
+      show-details: never
+  # 외부 의존성 health 체크 비활성화 (placeholder 자격증명으로 false positive 방지).
+  # db/redis/디스크/ping이 실제 가용성을 커버.
+  health:
+    mail:
+      enabled: false
+    ssl:
+      enabled: false

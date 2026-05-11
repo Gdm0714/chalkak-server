@@ -1,6 +1,10 @@
 spring:
   application:
     name: chalkak-server
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   mail:
     host: smtp.gmail.com
     port: 587
@@ -67,6 +71,19 @@ spring:
         max-active: 8
         max-idle: 8
         min-idle: 0
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ${AWS_REGION:ap-northeast-2}
+    s3:
+      bucket: ${AWS_S3_BUCKET:chalkak-uploads}
+
+firebase:
+  service-account-path: ${FIREBASE_SERVICE_ACCOUNT_PATH:}
 
 app:
   admin-email: ${ADMIN_EMAIL:admin@chalkak.co.kr}

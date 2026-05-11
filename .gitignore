@@ -40,3 +40,12 @@ out/
 .env
 .env.local
 .env.*.local
+.env.production
+infra/.env.production
+*.pem
+.omc/
+nohup.out
+*.jsonl
+logs/
+private_key.pem
+firebase-service-account.json

@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "photo_booths",
@@ -59,9 +61,17 @@ public class PhotoBooth {
     
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-    
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "photo_booth_tags",
+        joinColumns = @JoinColumn(name = "photo_booth_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags = new HashSet<>();
     
     @PrePersist
     protected void onCreate() {
@@ -91,6 +101,11 @@ public class PhotoBooth {
         this.priceInfo = priceInfo;
     }
     
+    public void updateTags(Set<Tag> newTags) {
+        this.tags.clear();
+        this.tags.addAll(newTags);
+    }
+
     public void update(String name, String brand, String series, String address, String roadAddress,
                       Double latitude, Double longitude, String operatingHours,
                       String phoneNumber, String description, String priceInfo) {
