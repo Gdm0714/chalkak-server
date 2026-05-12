@@ -165,6 +165,15 @@ public class PhotoBoothController {
         return ResponseEntity.ok(reports);
     }
 
+    @GetMapping("/reports/my/stats")
+    @Operation(summary = "내 제보 통계", description = "내가 제보한 사진관의 처리 상태별 통계를 조회합니다")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<Map<String, Long>> getMyReportStats(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Map<String, Long> stats = photoBoothService.getMyReportStats(userDetails.getId());
+        return ResponseEntity.ok(stats);
+    }
+
     // ==================== 이미지 ====================
 
     @GetMapping("/{id}/images")

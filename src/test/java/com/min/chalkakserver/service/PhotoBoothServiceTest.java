@@ -3,9 +3,14 @@ package com.min.chalkakserver.service;
 import com.min.chalkakserver.dto.PagedResponseDto;
 import com.min.chalkakserver.dto.PhotoBoothResponseDto;
 import com.min.chalkakserver.entity.PhotoBooth;
+import com.min.chalkakserver.entity.PhotoBoothReport;
+import com.min.chalkakserver.entity.User;
+import com.min.chalkakserver.repository.PhotoBoothImageRepository;
+import com.min.chalkakserver.repository.PhotoBoothReportRepository;
 import com.min.chalkakserver.exception.InvalidLocationException;
 import com.min.chalkakserver.exception.PhotoBoothNotFoundException;
 import com.min.chalkakserver.repository.PhotoBoothRepository;
+import com.min.chalkakserver.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,6 +39,15 @@ class PhotoBoothServiceTest {
 
     @Mock
     private PhotoBoothRepository photoBoothRepository;
+
+    @Mock
+    private PhotoBoothImageRepository photoBoothImageRepository;
+
+    @Mock
+    private PhotoBoothReportRepository photoBoothReportRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private PhotoBoothService photoBoothService;
@@ -132,6 +146,8 @@ class PhotoBoothServiceTest {
             // given
             given(photoBoothRepository.findById(1L))
                     .willReturn(Optional.of(testPhotoBooth));
+            given(photoBoothImageRepository.findByPhotoBoothIdOrderByDisplayOrder(1L))
+                    .willReturn(List.of());
 
             // when
             PhotoBoothResponseDto result = photoBoothService.getPhotoBoothById(1L);
@@ -152,6 +168,41 @@ class PhotoBoothServiceTest {
             // when & then
             assertThatThrownBy(() -> photoBoothService.getPhotoBoothById(999L))
                     .isInstanceOf(PhotoBoothNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("내 제보 통계 테스트")
+    class GetMyReportStatsTest {
+
+        @Test
+        @DisplayName("상태별 내 제보 통계를 조회한다")
+        void getMyReportStats_success() {
+            User user = User.builder()
+                    .email("test@test.com")
+                    .nickname("tester")
+                    .provider(User.AuthProvider.EMAIL)
+                    .providerId("test@test.com")
+                    .role(User.Role.USER)
+                    .build();
+
+            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(photoBoothReportRepository.countByUser(user)).willReturn(6L);
+            given(photoBoothReportRepository.countByUserAndStatus(user, PhotoBoothReport.ReportStatus.PENDING)).willReturn(1L);
+            given(photoBoothReportRepository.countByUserAndStatus(user, PhotoBoothReport.ReportStatus.REVIEWING)).willReturn(2L);
+            given(photoBoothReportRepository.countByUserAndStatus(user, PhotoBoothReport.ReportStatus.APPROVED)).willReturn(3L);
+            given(photoBoothReportRepository.countByUserAndStatus(user, PhotoBoothReport.ReportStatus.REJECTED)).willReturn(0L);
+            given(photoBoothReportRepository.countByUserAndStatus(user, PhotoBoothReport.ReportStatus.DUPLICATE)).willReturn(0L);
+
+            var result = photoBoothService.getMyReportStats(1L);
+
+            assertThat(result)
+                    .containsEntry("totalCount", 6L)
+                    .containsEntry("pendingCount", 1L)
+                    .containsEntry("reviewingCount", 2L)
+                    .containsEntry("approvedCount", 3L)
+                    .containsEntry("rejectedCount", 0L)
+                    .containsEntry("duplicateCount", 0L);
         }
     }
 

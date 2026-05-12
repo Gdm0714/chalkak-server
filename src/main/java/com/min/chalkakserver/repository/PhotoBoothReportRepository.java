@@ -15,5 +15,9 @@ public interface PhotoBoothReportRepository extends JpaRepository<PhotoBoothRepo
     @Query("SELECT r FROM PhotoBoothReport r WHERE r.user = :user ORDER BY r.createdAt DESC")
     List<PhotoBoothReport> findByUser(@Param("user") User user);
 
+    long countByUser(User user);
+
+    long countByUserAndStatus(User user, PhotoBoothReport.ReportStatus status);
+
     void deleteAllByUser(User user);
 }

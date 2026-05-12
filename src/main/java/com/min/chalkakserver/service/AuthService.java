@@ -220,10 +220,12 @@ public class AuthService {
 
         long reviewCount = reviewRepository.countByUser(user);
         long favoriteCount = favoriteRepository.countByUser(user);
+        long reportCount = photoBoothReportRepository.countByUser(user);
 
         return Map.of(
             "reviewCount", reviewCount,
-            "favoriteCount", favoriteCount
+            "favoriteCount", favoriteCount,
+            "reportCount", reportCount
         );
     }
 

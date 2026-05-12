@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.min.chalkakserver.config.RateLimitConfig;
 import com.min.chalkakserver.config.WebMvcConfig;
 import com.min.chalkakserver.dto.PhotoBoothReportDto;
+import com.min.chalkakserver.entity.User;
 import com.min.chalkakserver.exception.PhotoBoothNotFoundException;
+import com.min.chalkakserver.security.CustomUserDetails;
 import com.min.chalkakserver.security.jwt.JwtAuthenticationFilter;
 import com.min.chalkakserver.service.EmailService;
+import com.min.chalkakserver.service.PhotoBoothImageService;
 import com.min.chalkakserver.service.PhotoBoothService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +19,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.lang.reflect.Field;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -41,6 +49,9 @@ class PhotoBoothControllerTest {
 
     @MockBean
     private PhotoBoothService photoBoothService;
+
+    @MockBean
+    private PhotoBoothImageService photoBoothImageService;
 
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -222,5 +233,46 @@ class PhotoBoothControllerTest {
                         .content(objectMapper.writeValueAsString(reportDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("제보가 접수되었습니다. 감사합니다!"));
+    }
+
+    @Test
+    void getMyReportStats_ShouldReturn200() throws Exception {
+        when(photoBoothService.getMyReportStats(1L)).thenReturn(Map.of(
+                "totalCount", 3L,
+                "pendingCount", 1L,
+                "reviewingCount", 1L,
+                "approvedCount", 1L,
+                "rejectedCount", 0L,
+                "duplicateCount", 0L
+        ));
+
+        PhotoBoothController controller = new PhotoBoothController(
+                photoBoothService,
+                photoBoothImageService,
+                emailService
+        );
+
+        ResponseEntity<Map<String, Long>> response = controller.getMyReportStats(customUserDetails(1L));
+
+        org.assertj.core.api.Assertions.assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        org.assertj.core.api.Assertions.assertThat(response.getBody())
+                .containsEntry("totalCount", 3L)
+                .containsEntry("pendingCount", 1L)
+                .containsEntry("reviewingCount", 1L)
+                .containsEntry("approvedCount", 1L);
+    }
+
+    private CustomUserDetails customUserDetails(Long id) throws Exception {
+        User testUser = User.builder()
+                .email("test@test.com")
+                .nickname("tester")
+                .provider(User.AuthProvider.EMAIL)
+                .providerId("test@test.com")
+                .role(User.Role.USER)
+                .build();
+        Field idField = User.class.getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(testUser, id);
+        return new CustomUserDetails(testUser);
     }
 }

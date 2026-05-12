@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.min.chalkakserver.dto.PhotoBoothReportDto;
@@ -317,5 +318,21 @@ public class PhotoBoothService {
         return photoBoothReportRepository.findByUser(user).stream()
             .map(PhotoBoothReportResponseDto::from)
             .collect(Collectors.toList());
+    }
+
+    // 내 제보 통계 조회
+    @Transactional(readOnly = true)
+    public Map<String, Long> getMyReportStats(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AuthException("User not found"));
+
+        return Map.of(
+            "totalCount", photoBoothReportRepository.countByUser(user),
+            "pendingCount", photoBoothReportRepository.countByUserAndStatus(user, PhotoBoothReport.ReportStatus.PENDING),
+            "reviewingCount", photoBoothReportRepository.countByUserAndStatus(user, PhotoBoothReport.ReportStatus.REVIEWING),
+            "approvedCount", photoBoothReportRepository.countByUserAndStatus(user, PhotoBoothReport.ReportStatus.APPROVED),
+            "rejectedCount", photoBoothReportRepository.countByUserAndStatus(user, PhotoBoothReport.ReportStatus.REJECTED),
+            "duplicateCount", photoBoothReportRepository.countByUserAndStatus(user, PhotoBoothReport.ReportStatus.DUPLICATE)
+        );
     }
 }
