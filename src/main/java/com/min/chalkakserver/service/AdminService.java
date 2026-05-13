@@ -37,6 +37,7 @@ public class AdminService {
     private final ReviewRepository reviewRepository;
     private final FavoriteRepository favoriteRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final com.min.chalkakserver.repository.PostRepository postRepository;
 
     /**
      * 관리자 대시보드 통계
@@ -242,5 +243,17 @@ public class AdminService {
 
         reviewRepository.deleteById(reviewId);
         log.info("Review deleted by admin: reviewId={}", reviewId);
+    }
+
+    /**
+     * 포스트 삭제 (관리자)
+     */
+    @Transactional
+    public void deletePost(Long postId) {
+        if (!postRepository.existsById(postId)) {
+            throw new com.min.chalkakserver.exception.PostNotFoundException(postId);
+        }
+        postRepository.deleteById(postId);
+        log.info("Post deleted by admin: postId={}", postId);
     }
 }

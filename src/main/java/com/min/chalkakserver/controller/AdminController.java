@@ -109,6 +109,15 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("message", "리뷰가 삭제되었습니다."));
     }
 
+    // ==================== 포스트 관리 ====================
+
+    @Operation(summary = "포스트 삭제 (관리자)", description = "부적절한 포스트 삭제")
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<Map<String, String>> deletePost(@PathVariable Long postId) {
+        adminService.deletePost(postId);
+        return ResponseEntity.ok(Map.of("message", "포스트가 삭제되었습니다."));
+    }
+
     // ==================== 태그 관리 ====================
 
     @Operation(summary = "태그 목록", description = "전체 태그 목록 조회")
