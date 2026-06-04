@@ -5,7 +5,10 @@ import com.min.chalkakserver.dto.PhotoBoothResponseDto;
 import com.min.chalkakserver.entity.PhotoBooth;
 import com.min.chalkakserver.exception.InvalidLocationException;
 import com.min.chalkakserver.exception.PhotoBoothNotFoundException;
+import com.min.chalkakserver.repository.PhotoBoothImageRepository;
+import com.min.chalkakserver.repository.PhotoBoothReportRepository;
 import com.min.chalkakserver.repository.PhotoBoothRepository;
+import com.min.chalkakserver.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,6 +30,7 @@ import java.lang.reflect.Field;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PhotoBoothService 테스트")
@@ -34,6 +38,12 @@ class PhotoBoothServiceTest {
 
     @Mock
     private PhotoBoothRepository photoBoothRepository;
+    @Mock
+    private PhotoBoothImageRepository photoBoothImageRepository;
+    @Mock
+    private PhotoBoothReportRepository photoBoothReportRepository;
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private PhotoBoothService photoBoothService;
@@ -62,6 +72,8 @@ class PhotoBoothServiceTest {
                 .longitude(127.0300)
                 .build();
         setEntityId(testPhotoBooth2, 2L);
+        lenient().when(photoBoothImageRepository.findByPhotoBoothIdOrderByDisplayOrder(anyLong()))
+                .thenReturn(List.of());
     }
 
     @Nested

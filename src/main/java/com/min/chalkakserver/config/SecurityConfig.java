@@ -61,6 +61,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/congestion/**").permitAll()
                 // 최근 리뷰 피드는 인증 없이 허용
                 .requestMatchers(HttpMethod.GET, "/api/reviews/recent").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/stats/**").permitAll()
                 // 피드 조회는 인증 없이 허용 (GET만)
                 .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/photo-booths/report").permitAll()

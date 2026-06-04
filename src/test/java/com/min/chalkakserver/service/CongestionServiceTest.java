@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -40,6 +41,8 @@ class CongestionServiceTest {
     private PhotoBoothRepository photoBoothRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private CongestionService congestionService;
@@ -61,6 +64,7 @@ class CongestionServiceTest {
                 .providerId("user-1")
                 .role(User.Role.USER)
                 .build();
+        ReflectionTestUtils.setField(congestionService, "notificationService", notificationService);
     }
 
     @Test

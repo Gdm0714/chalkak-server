@@ -17,6 +17,18 @@ spring:
         
   cache:
     type: simple
+
+  mail:
+    username: test
+    password: test
+
+cloud:
+  aws:
+    credentials:
+      access-key: test
+      secret-key: test
+    region:
+      static: ap-northeast-2
     
 logging:
   level:

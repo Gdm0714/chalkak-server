@@ -7,6 +7,7 @@ import com.min.chalkakserver.dto.PhotoBoothReportDto;
 import com.min.chalkakserver.exception.PhotoBoothNotFoundException;
 import com.min.chalkakserver.security.jwt.JwtAuthenticationFilter;
 import com.min.chalkakserver.service.EmailService;
+import com.min.chalkakserver.service.PhotoBoothImageService;
 import com.min.chalkakserver.service.PhotoBoothService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,9 @@ class PhotoBoothControllerTest {
 
     @MockBean
     private PhotoBoothService photoBoothService;
+
+    @MockBean
+    private PhotoBoothImageService photoBoothImageService;
 
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
