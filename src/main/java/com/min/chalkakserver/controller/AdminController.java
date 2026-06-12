@@ -5,7 +5,10 @@ import com.min.chalkakserver.dto.PhotoBoothRequestDto;
 import com.min.chalkakserver.dto.PhotoBoothResponseDto;
 import com.min.chalkakserver.dto.admin.AdminStatsDto;
 import com.min.chalkakserver.dto.admin.UserListResponseDto;
+import com.min.chalkakserver.dto.framecollab.FrameCollabDetailResponseDto;
+import com.min.chalkakserver.dto.framecollab.FrameCollabRequestDto;
 import com.min.chalkakserver.service.AdminService;
+import com.min.chalkakserver.service.FrameCollabService;
 import com.min.chalkakserver.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,6 +33,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final TagService tagService;
+    private final FrameCollabService frameCollabService;
 
     // ==================== 대시보드 ====================
 
@@ -116,6 +120,38 @@ public class AdminController {
     public ResponseEntity<Map<String, String>> deletePost(@PathVariable Long postId) {
         adminService.deletePost(postId);
         return ResponseEntity.ok(Map.of("message", "포스트가 삭제되었습니다."));
+    }
+
+    // ==================== 프레임 콜라보 관리 ====================
+
+    @Operation(summary = "프레임 콜라보 생성", description = "새 프레임 콜라보 등록 (입고 매장 포함 가능)")
+    @PostMapping("/frame-collabs")
+    public ResponseEntity<FrameCollabDetailResponseDto> createFrameCollab(
+            @Valid @RequestBody FrameCollabRequestDto request) {
+        return ResponseEntity.ok(frameCollabService.createCollab(request));
+    }
+
+    @Operation(summary = "프레임 콜라보 수정", description = "프레임 콜라보 정보 수정")
+    @PutMapping("/frame-collabs/{id}")
+    public ResponseEntity<FrameCollabDetailResponseDto> updateFrameCollab(
+            @PathVariable Long id,
+            @Valid @RequestBody FrameCollabRequestDto request) {
+        return ResponseEntity.ok(frameCollabService.updateCollab(id, request));
+    }
+
+    @Operation(summary = "프레임 콜라보 삭제", description = "프레임 콜라보 삭제")
+    @DeleteMapping("/frame-collabs/{id}")
+    public ResponseEntity<Map<String, String>> deleteFrameCollab(@PathVariable Long id) {
+        frameCollabService.deleteCollab(id);
+        return ResponseEntity.ok(Map.of("message", "프레임 콜라보가 삭제되었습니다."));
+    }
+
+    @Operation(summary = "콜라보 입고 매장 설정", description = "콜라보에 입고 매장 일괄 설정")
+    @PutMapping("/frame-collabs/{id}/booths")
+    public ResponseEntity<FrameCollabDetailResponseDto> setFrameCollabBooths(
+            @PathVariable Long id,
+            @RequestBody List<Long> photoBoothIds) {
+        return ResponseEntity.ok(frameCollabService.setPhotoBooths(id, photoBoothIds));
     }
 
     // ==================== 태그 관리 ====================

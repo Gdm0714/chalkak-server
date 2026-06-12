@@ -59,6 +59,8 @@ public class SecurityConfig {
                 // 포토부스 조회 API는 인증 없이 허용 (GET만)
                 .requestMatchers(HttpMethod.GET, "/api/photo-booths/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/congestion/**").permitAll()
+                // 프레임 콜라보 조회는 인증 없이 허용 (GET만)
+                .requestMatchers(HttpMethod.GET, "/api/frame-collabs/**").permitAll()
                 // 최근 리뷰 피드는 인증 없이 허용
                 .requestMatchers(HttpMethod.GET, "/api/reviews/recent").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/stats/**").permitAll()
