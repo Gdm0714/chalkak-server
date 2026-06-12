@@ -39,4 +39,6 @@ public interface FrameCollabRepository extends JpaRepository<FrameCollab, Long> 
            "LEFT JOIN FETCH fc.photoBooths " +
            "WHERE fc.id = :id")
     Optional<FrameCollab> findByIdWithBooths(@Param("id") Long id);
+
+    boolean existsByIdAndPhotoBoothsId(Long id, Long photoBoothId);
 }

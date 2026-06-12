@@ -268,6 +268,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
+    @ExceptionHandler(DuplicateAvailabilityReportException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateAvailabilityReportException(
+            DuplicateAvailabilityReportException ex, HttpServletRequest request) {
+
+        log.error("Duplicate availability report: {}", ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("frameCollabId", ex.getFrameCollabId());
+        details.put("photoBoothId", ex.getPhotoBoothId());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.CONFLICT.value(),
+            "Conflict",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
     @ExceptionHandler(DuplicateCongestionReportException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateCongestionReportException(
             DuplicateCongestionReportException ex, HttpServletRequest request) {
