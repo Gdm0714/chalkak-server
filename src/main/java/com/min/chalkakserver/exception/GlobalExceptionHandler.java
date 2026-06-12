@@ -51,6 +51,31 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 포토북 사진을 찾을 수 없는 경우
+     */
+    @ExceptionHandler(PhotobookEntryNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePhotobookEntryNotFoundException(
+            PhotobookEntryNotFoundException ex, HttpServletRequest request) {
+
+        log.error("Photobook entry not found: {}", ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        if (ex.getEntryId() != null) {
+            details.put("entryId", ex.getEntryId());
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
      * 프레임 콜라보를 찾을 수 없는 경우
      */
     @ExceptionHandler(FrameCollabNotFoundException.class)
