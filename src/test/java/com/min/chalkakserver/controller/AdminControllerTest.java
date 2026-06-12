@@ -12,6 +12,7 @@ import com.min.chalkakserver.entity.User;
 import com.min.chalkakserver.security.CustomUserDetails;
 import com.min.chalkakserver.security.jwt.JwtAuthenticationFilter;
 import com.min.chalkakserver.service.AdminService;
+import com.min.chalkakserver.service.CollabCandidateService;
 import com.min.chalkakserver.service.FrameCollabService;
 import com.min.chalkakserver.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +63,9 @@ class AdminControllerTest {
 
     @MockBean
     private FrameCollabService frameCollabService;
+
+    @MockBean
+    private CollabCandidateService collabCandidateService;
 
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;

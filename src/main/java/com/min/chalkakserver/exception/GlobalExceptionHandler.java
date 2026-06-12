@@ -51,6 +51,31 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 콜라보 후보를 찾을 수 없는 경우
+     */
+    @ExceptionHandler(CollabCandidateNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCollabCandidateNotFoundException(
+            CollabCandidateNotFoundException ex, HttpServletRequest request) {
+
+        log.error("Collab candidate not found: {}", ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        if (ex.getCandidateId() != null) {
+            details.put("candidateId", ex.getCandidateId());
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
      * 포토북 사진을 찾을 수 없는 경우
      */
     @ExceptionHandler(PhotobookEntryNotFoundException.class)
