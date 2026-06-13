@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -53,7 +54,9 @@ public class FrameCollab {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // 피드 목록에서 콜라보별 매장 수(getPhotoBooths().size())를 읽을 때 N+1을 줄이기 위해 배치 로딩
     @ManyToMany(fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @JoinTable(
         name = "frame_collab_booths",
         joinColumns = @JoinColumn(name = "frame_collab_id"),
