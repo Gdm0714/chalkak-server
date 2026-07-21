@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy to OCI
 
 on:
   push:
@@ -15,24 +15,22 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Trigger deploy on EC2
+      - name: Trigger deploy on OCI
         env:
-          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          HOST: ${{ secrets.EC2_HOST }}
-          USER: ${{ secrets.EC2_USER }}
+          PRIVATE_KEY: ${{ secrets.OCI_SSH_KEY }}
+          HOST: ${{ secrets.OCI_HOST }}
+          USER: ${{ secrets.OCI_USER }}
         run: |
           set -e
-          echo "🚀 EC2 배포 시작 ($HOST)..."
+          echo "🚀 OCI 배포 시작 ($HOST)..."
 
           echo "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
 
-          # 서버에서 git pull → docker build → 무중단 재시작 (Docker 기반)
+          # OCI 서버에서 git pull → app 이미지 재빌드 → app 컨테이너만 재기동
+          # (mysql/redis/caddy 및 DB 데이터는 유지 — /opt/chalkak/deploy.sh 내부에서 처리)
           ssh -i private_key.pem -o StrictHostKeyChecking=no -o ServerAliveInterval=30 \
-            $USER@$HOST 'bash /opt/chalkak/repo/infra/deploy.sh'
+            "$USER@$HOST" 'bash /opt/chalkak/deploy.sh'
 
           echo "✅ 배포 완료"
 
