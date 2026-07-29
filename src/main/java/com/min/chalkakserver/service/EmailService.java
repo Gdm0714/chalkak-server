@@ -43,6 +43,40 @@ public class EmailService {
         }
     }
 
+    @Async
+    public void sendPasswordResetCode(String toEmail, String code) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("[찰칵] 비밀번호 재설정 인증코드");
+            helper.setText(buildPasswordResetEmailContent(code), true);
+
+            mailSender.send(message);
+            log.info("비밀번호 재설정 인증코드 전송 성공: {}", escapeForLog(toEmail));
+        } catch (MessagingException | RuntimeException e) {
+            // @Async 메서드에서는 예외를 던져도 호출자에게 전달되지 않으므로 로깅만 수행
+            log.error("비밀번호 재설정 인증코드 전송 실패: {}", escapeForLog(toEmail), e);
+        }
+    }
+
+    private String buildPasswordResetEmailContent(String code) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><body>");
+        sb.append("<h2>비밀번호 재설정 인증코드</h2>");
+        sb.append("<p>아래 6자리 인증코드를 입력해 비밀번호를 재설정해주세요.</p>");
+        sb.append("<p style='font-size: 28px; font-weight: bold; letter-spacing: 4px;'>")
+            .append(escapeHtml(code))
+            .append("</p>");
+        sb.append("<p style='color: gray;'>이 인증코드는 5분간 유효합니다.</p>");
+        sb.append("<hr>");
+        sb.append(
+            "<p style='color: gray; font-size: 12px;'>본인이 요청하지 않았다면 이 메일을 무시하셔도 됩니다.</p>");
+        sb.append("</body></html>");
+        return sb.toString();
+    }
+
     /**
      * HTML 이스케이프 처리 - XSS 방지
      */

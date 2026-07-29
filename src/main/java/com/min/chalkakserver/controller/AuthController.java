@@ -3,6 +3,7 @@ package com.min.chalkakserver.controller;
 import com.min.chalkakserver.dto.auth.*;
 import com.min.chalkakserver.security.CustomUserDetails;
 import com.min.chalkakserver.service.AuthService;
+import com.min.chalkakserver.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "Auth", description = "인증 API")
@@ -21,6 +23,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
     @Operation(summary = "소셜 로그인", description = "카카오/네이버/애플 소셜 로그인")
     @PostMapping("/login")
@@ -96,6 +99,42 @@ public class AuthController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         authService.deleteAccount(userDetails.getId());
         return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다."));
+    }
+
+    @Operation(summary = "비밀번호 재설정 요청", description = "이메일로 6자리 인증코드 발송 (계정 존재 여부와 무관하게 200 반환)")
+    @PostMapping("/password/reset/request")
+    public ResponseEntity<Map<String, String>> requestPasswordReset(
+            @Valid @RequestBody PasswordResetRequestDto request) {
+        passwordResetService.requestReset(request.getEmail());
+        return ResponseEntity.ok(Map.of("message", "인증코드가 발송되었습니다. 이메일을 확인해주세요."));
+    }
+
+    @Operation(summary = "비밀번호 재설정 인증코드 검증", description = "인증코드 검증 후 리셋 토큰 발급")
+    @PostMapping("/password/reset/verify")
+    public ResponseEntity<PasswordResetVerifyResponseDto> verifyPasswordResetCode(
+            @Valid @RequestBody PasswordResetVerifyRequestDto request) {
+        String resetToken = passwordResetService.verifyCode(request.getEmail(), request.getCode());
+        return ResponseEntity.ok(PasswordResetVerifyResponseDto.builder()
+            .resetToken(resetToken)
+            .build());
+    }
+
+    @Operation(summary = "비밀번호 재설정 확정", description = "리셋 토큰으로 새 비밀번호 설정")
+    @PostMapping("/password/reset/confirm")
+    public ResponseEntity<Map<String, String>> confirmPasswordReset(
+            @Valid @RequestBody PasswordResetConfirmRequestDto request) {
+        passwordResetService.confirmReset(request.getResetToken(), request.getNewPassword());
+        return ResponseEntity.ok(Map.of("message", "비밀번호가 재설정되었습니다."));
+    }
+
+    @Operation(summary = "가입 수단 찾기", description = "이메일로 가입된 로그인 수단(provider) 목록 조회")
+    @PostMapping("/find-provider")
+    public ResponseEntity<FindProviderResponseDto> findProvider(
+            @Valid @RequestBody FindProviderRequestDto request) {
+        List<String> providers = passwordResetService.findProviders(request.getEmail());
+        return ResponseEntity.ok(FindProviderResponseDto.builder()
+            .providers(providers)
+            .build());
     }
 
     @Operation(summary = "프로필 수정", description = "닉네임 등 프로필 정보 수정")
