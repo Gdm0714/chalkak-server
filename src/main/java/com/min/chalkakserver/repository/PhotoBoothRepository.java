@@ -3,6 +3,7 @@ package com.min.chalkakserver.repository;
 import com.min.chalkakserver.entity.PhotoBooth;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,13 @@ import java.util.List;
 
 @Repository
 public interface PhotoBoothRepository extends JpaRepository<PhotoBooth, Long> {
-    
+
+    // 전체 목록은 응답 변환 시 태그를 모두 읽으므로 한 번에 fetch join 한다
+    // (페이지네이션 경로는 컬렉션 fetch join 시 메모리 페이징이 발생하므로 @BatchSize에 맡긴다)
+    @Override
+    @EntityGraph(attributePaths = "tags")
+    List<PhotoBooth> findAll();
+
     // 브랜드로 검색
     List<PhotoBooth> findByBrandContainingIgnoreCase(String brand);
     

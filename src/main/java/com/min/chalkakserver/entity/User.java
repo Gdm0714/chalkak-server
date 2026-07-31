@@ -111,6 +111,10 @@ public class User {
         this.lastLoginAt = LocalDateTime.now();
     }
 
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
     public void updateRole(Role role) {
         this.role = role;
     }

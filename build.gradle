@@ -59,6 +59,9 @@ dependencies {
     // AWS S3
     implementation 'software.amazon.awssdk:s3:2.25.27'
 
+    // Thumbnail 생성
+    implementation 'net.coobird:thumbnailator:0.4.20'
+
     // Firebase Admin SDK
     implementation 'com.google.firebase:firebase-admin:9.2.0'
 }

@@ -24,8 +24,73 @@ services:
     networks:
       - chalkak-network
 
+  # ── 로컬 개발용 MySQL ──────────────────────────────────────────────
+  # application.yml 기본값과 일치: chalkak_db / chalkak / chalkak123
+  mysql:
+    image: mysql:8.0
+    container_name: chalkak-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: chalkak_db
+      MYSQL_USER: chalkak
+      MYSQL_PASSWORD: chalkak123
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uchalkak", "-pchalkak123"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - chalkak-network
+
+  # ── 로컬 개발용 MinIO (S3 호환 오브젝트 스토리지) ─────────────────
+  # API :9000 / 콘솔 :9001 (minioadmin / minioadmin)
+  minio:
+    image: minio/minio:latest
+    container_name: chalkak-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - chalkak-network
+
+  # 버킷 자동 생성 + 익명 read 허용 (앱이 반환하는 public 이미지 URL 로딩용)
+  createbuckets:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set local http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb -p local/chalkak-uploads;
+      /usr/bin/mc anonymous set download local/chalkak-uploads;
+      exit 0;
+      "
+    networks:
+      - chalkak-network
+
 volumes:
   redis_data:
+    driver: local
+  mysql_data:
+    driver: local
+  minio_data:
     driver: local
 
 networks:

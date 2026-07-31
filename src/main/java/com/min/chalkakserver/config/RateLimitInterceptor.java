@@ -28,8 +28,10 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
         // API 종류에 따른 Rate Limit 적용
         Bucket bucket;
-        if (requestUri.contains("/auth/login") || requestUri.contains("/auth/refresh")) {
-            // 인증 API: 브루트포스 공격 방지를 위한 엄격한 제한
+        if (requestUri.contains("/auth/login") || requestUri.contains("/auth/refresh")
+                || requestUri.contains("/auth/password/reset/request")
+                || requestUri.contains("/auth/find-provider")) {
+            // 인증 API: 브루트포스 공격 방지 및 이메일 열거/폭탄 방지를 위한 엄격한 제한
             bucket = rateLimitConfig.resolveAuthBucket(ipAddress);
         } else if (requestUri.contains("/report")) {
             // 제보 API: 스팸 방지
