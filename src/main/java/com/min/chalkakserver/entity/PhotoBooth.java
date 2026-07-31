@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -65,7 +66,10 @@ public class PhotoBooth {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // 목록 응답은 booth마다 태그를 읽으므로, 배치로 묶어 N+1을 방지한다
+    // (네이티브 쿼리 경로인 nearby/popular 포함 전 조회 경로에 적용됨)
     @ManyToMany(fetch = FetchType.LAZY)
+    @BatchSize(size = 200)
     @JoinTable(
         name = "photo_booth_tags",
         joinColumns = @JoinColumn(name = "photo_booth_id"),
