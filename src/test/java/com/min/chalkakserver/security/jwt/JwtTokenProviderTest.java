@@ -139,6 +139,18 @@ class JwtTokenProviderTest {
     }
 
     @Test
+    @DisplayName("validateToken - token signed with another secret returns false (must not throw)")
+    void validateToken_wrongSignature_returnsFalse() throws Exception {
+        // 다른 시크릿으로 서명된 토큰 (구 서버/로컬 환경에서 발급된 토큰 등)
+        JwtTokenProvider otherProvider = createProvider(
+                "another-secret-key-must-be-at-least-32-characters", ACCESS_VALIDITY, REFRESH_VALIDITY);
+        String foreignToken = otherProvider.createRefreshToken(buildUser());
+
+        // SignatureException이 전파되면 /api/auth/refresh가 401 대신 500을 반환한다
+        assertThat(jwtTokenProvider.validateToken(foreignToken)).isFalse();
+    }
+
+    @Test
     @DisplayName("validateToken - null token returns false")
     void validateToken_nullToken_returnsFalse() {
         assertThat(jwtTokenProvider.validateToken(null)).isFalse();

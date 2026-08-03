@@ -3,6 +3,7 @@ package com.min.chalkakserver.security.jwt;
 import com.min.chalkakserver.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,14 +83,21 @@ public class JwtTokenProvider {
                     .build()
                     .parseSignedClaims(token);
             return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            log.error("Invalid JWT signature: {}", e.getMessage());
+        } catch (SignatureException | MalformedJwtException e) {
+            // io.jsonwebtoken.security.SignatureException 이어야 한다.
+            // java.lang.SecurityException 으로 잡으면 서명 불일치가 호출자까지 전파되어
+            // /api/auth/refresh 가 401 대신 500을 반환한다.
+            log.warn("Invalid JWT signature: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            log.error("Expired JWT token: {}", e.getMessage());
+            // 액세스 토큰 만료는 정상 흐름(클라이언트가 갱신)이므로 에러 레벨로 남기지 않는다.
+            log.debug("Expired JWT token: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT token: {}", e.getMessage());
+            log.warn("Unsupported JWT token: {}", e.getMessage());
+        } catch (JwtException e) {
+            // 위에서 다루지 않은 모든 JJWT 예외도 검증 실패(false)로 수렴시킨다.
+            log.warn("Invalid JWT token: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty: {}", e.getMessage());
+            log.warn("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
     }
