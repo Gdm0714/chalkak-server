@@ -12,6 +12,19 @@ spring:
   cache:
     type: redis
 
+# Server - 리버스 프록시(Caddy) 뒤에서 실제 클라이언트 IP를 인식
+# 이 설정이 없으면 request.getRemoteAddr()가 항상 Caddy 컨테이너 IP를 반환해
+# 레이트 리밋 버킷이 전체 사용자에게 하나로 공유된다 (인증 API 전역 10회/분).
+# native 전략은 Tomcat RemoteIpValve를 사용하므로 신뢰된 사설망 프록시
+# (기본값: 10/8, 172.16/12, 192.168/16, 127/8)에서 온 헤더만 반영한다.
+# → 외부에서 X-Forwarded-For를 위조해 레이트 리밋을 우회할 수 없다.
+server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      remote-ip-header: X-Forwarded-For
+      protocol-header: X-Forwarded-Proto
+
 # Logging
 logging:
   level:

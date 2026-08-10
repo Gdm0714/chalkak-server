@@ -1,12 +1,18 @@
 package com.min.chalkakserver.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.min.chalkakserver.dto.ErrorResponse;
 import com.min.chalkakserver.security.jwt.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +24,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,6 +37,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ObjectMapper objectMapper;
 
     @Value("${cors.allowed-origins:http://localhost:*,https://localhost:*}")
     private String allowedOrigins;
@@ -76,9 +85,35 @@ public class SecurityConfig {
                 // 나머지 API는 인증 필요
                 .anyRequest().authenticated()
             )
+            .exceptionHandling(exception -> exception
+                // 인증 실패(토큰 없음/만료/서명 불일치)는 401로 응답한다.
+                // 스프링 시큐리티 기본값은 403이라, 클라이언트가 "권한 없음"과 "토큰 갱신 필요"를
+                // 구분할 수 없었다.
+                .authenticationEntryPoint((request, response, authException) ->
+                    writeErrorResponse(request, response, HttpStatus.UNAUTHORIZED,
+                        "Unauthorized", "인증이 필요합니다. 토큰이 없거나 유효하지 않습니다."))
+                // 인증은 되었으나 권한이 부족한 경우만 403으로 응답한다.
+                .accessDeniedHandler((request, response, deniedException) ->
+                    writeErrorResponse(request, response, HttpStatus.FORBIDDEN,
+                        "Forbidden", "이 리소스에 접근할 권한이 없습니다."))
+            )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * 시큐리티 필터 단계의 에러도 컨트롤러 예외와 동일한 ErrorResponse 형태로 응답한다.
+     */
+    private void writeErrorResponse(HttpServletRequest request, HttpServletResponse response,
+                                    HttpStatus status, String error, String message) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        objectMapper.writeValue(
+            response.getWriter(),
+            new ErrorResponse(status.value(), error, message, request.getRequestURI())
+        );
     }
 
     @Bean
