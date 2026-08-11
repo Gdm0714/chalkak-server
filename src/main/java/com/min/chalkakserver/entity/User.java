@@ -107,6 +107,12 @@ public class User {
         }
     }
 
+    public void updateProfileImageUrl(String profileImageUrl) {
+        if (profileImageUrl != null && !profileImageUrl.isBlank()) {
+            this.profileImageUrl = profileImageUrl;
+        }
+    }
+
     public void updateLastLogin() {
         this.lastLoginAt = LocalDateTime.now();
     }
