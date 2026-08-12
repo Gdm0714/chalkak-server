@@ -23,4 +23,10 @@ public class ProfileUpdateRequestDto {
     @Size(max = 500, message = "프로필 이미지 URL은 500자를 초과할 수 없습니다")
     @Pattern(regexp = "^https?://.+", message = "프로필 이미지 URL 형식이 올바르지 않습니다")
     private String profileImageUrl;
+
+    /**
+     * true면 프로필 이미지를 삭제한다 (profileImageUrl보다 우선).
+     * null 전달은 "변경 없음"이라 삭제와 구분되지 않으므로 별도 플래그로 받는다.
+     */
+    private Boolean removeProfileImage;
 }
