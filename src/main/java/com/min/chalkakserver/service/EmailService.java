@@ -1,6 +1,8 @@
 package com.min.chalkakserver.service;
 
 import com.min.chalkakserver.dto.PhotoBoothReportDto;
+import com.min.chalkakserver.exception.EmailSendException;
+import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.web.util.HtmlUtils;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,38 @@ public class EmailService {
 
     @Value("${app.admin-email}")
     private String adminEmail;
+
+    @Value("${spring.mail.username:}")
+    private String mailUsername;
+
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
+
+    /** .env.example의 예시 값. 이 값이 그대로 들어와 있으면 설정이 안 된 것이다. */
+    private static final Set<String> PLACEHOLDERS =
+        Set.of("your_email@gmail.com", "your_app_password_here", "changeme");
+
+    /**
+     * 메일 자격증명 누락을 시작 시점에 드러낸다.
+     *
+     * <p>앱을 죽이지는 않는다. 메일은 일부 기능(제보·비밀번호 재설정)만 쓰므로,
+     * 이것 때문에 API 전체를 내리는 편이 더 나쁘다. 대신 실패를 조용히 넘기지 않도록
+     * ERROR로 남긴다.
+     */
+    @PostConstruct
+    void warnIfMailNotConfigured() {
+        boolean missing = isUnset(mailUsername) || isUnset(mailPassword);
+        if (missing) {
+            log.error(
+                "메일 자격증명이 설정되지 않았습니다 (MAIL_USERNAME/MAIL_PASSWORD). "
+                    + "제보 메일과 비밀번호 재설정 인증코드가 발송되지 않습니다. "
+                    + "MAIL_PASSWORD는 Gmail 계정 비밀번호가 아니라 앱 비밀번호여야 합니다.");
+        }
+    }
+
+    private static boolean isUnset(String value) {
+        return value == null || value.isBlank() || PLACEHOLDERS.contains(value.trim());
+    }
 
     @Async
     public void sendPhotoBoothReport(PhotoBoothReportDto reportDto) {
@@ -43,7 +78,10 @@ public class EmailService {
         }
     }
 
-    @Async
+    /**
+     * 비밀번호 재설정 인증코드 발송. 사용자가 결과를 기다리므로 동기로 보내고
+     * 실패는 {@link EmailSendException}으로 알린다 (@Async로 두면 실패가 묻힌다).
+     */
     public void sendPasswordResetCode(String toEmail, String code) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -56,8 +94,8 @@ public class EmailService {
             mailSender.send(message);
             log.info("비밀번호 재설정 인증코드 전송 성공: {}", escapeForLog(toEmail));
         } catch (MessagingException | RuntimeException e) {
-            // @Async 메서드에서는 예외를 던져도 호출자에게 전달되지 않으므로 로깅만 수행
             log.error("비밀번호 재설정 인증코드 전송 실패: {}", escapeForLog(toEmail), e);
+            throw new EmailSendException("비밀번호 재설정 인증코드 전송 실패", e);
         }
     }
 

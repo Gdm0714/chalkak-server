@@ -3,6 +3,7 @@ package com.min.chalkakserver.service;
 import com.min.chalkakserver.entity.User;
 import com.min.chalkakserver.entity.User.AuthProvider;
 import com.min.chalkakserver.exception.AuthException;
+import com.min.chalkakserver.exception.EmailSendException;
 import com.min.chalkakserver.repository.RefreshTokenRepository;
 import com.min.chalkakserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -52,8 +53,17 @@ public class PasswordResetService {
         userRepository.findByEmailAndProvider(email, AuthProvider.EMAIL)
             .ifPresentOrElse(user -> {
                 String code = generateCode();
+
+                // 발송에 성공한 코드만 저장한다. 먼저 저장하면 메일이 실패해도
+                // 쓸 수 없는 코드가 5분간 남는다.
+                try {
+                    emailService.sendPasswordResetCode(email, code);
+                } catch (EmailSendException e) {
+                    throw new AuthException(
+                        "인증코드 발송에 실패했습니다. 잠시 후 다시 시도해주세요.", "SERVICE_UNAVAILABLE");
+                }
+
                 redisTemplate.opsForValue().set(CODE_KEY_PREFIX + email, code, CODE_TTL);
-                emailService.sendPasswordResetCode(email, code);
                 // 로컬 테스트용: 실제 SMTP 없이도 코드 확인 가능하도록 로그 출력
                 log.info("[DEV] 비밀번호 재설정 인증코드 생성: email={}, code={}", email, code);
             }, () -> {

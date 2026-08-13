@@ -3,6 +3,7 @@ package com.min.chalkakserver.service;
 import com.min.chalkakserver.entity.User;
 import com.min.chalkakserver.entity.User.AuthProvider;
 import com.min.chalkakserver.exception.AuthException;
+import com.min.chalkakserver.exception.EmailSendException;
 import com.min.chalkakserver.repository.RefreshTokenRepository;
 import com.min.chalkakserver.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -81,6 +83,23 @@ class PasswordResetServiceTest {
 
         verify(valueOperations).set(eq("pwreset:code:" + EMAIL), anyString(), any());
         verify(emailService).sendPasswordResetCode(eq(EMAIL), anyString());
+    }
+
+    @Test
+    @DisplayName("메일 발송이 실패하면 503으로 알리고 인증코드를 저장하지 않는다")
+    void reportsFailureWhenMailSendFails() {
+        given(userRepository.findByEmailAndProvider(EMAIL, AuthProvider.EMAIL))
+            .willReturn(Optional.of(emailUser()));
+        willThrow(new EmailSendException("boom", new RuntimeException()))
+            .given(emailService).sendPasswordResetCode(eq(EMAIL), anyString());
+
+        assertThatThrownBy(() -> passwordResetService.requestReset(EMAIL))
+            .isInstanceOf(AuthException.class)
+            .satisfies(
+                e -> assertThat(((AuthException) e).getCode()).isEqualTo("SERVICE_UNAVAILABLE"));
+
+        // 쓸 수 없는 코드가 남지 않아야 한다.
+        verify(redisTemplate, never()).opsForValue();
     }
 
     @Test
