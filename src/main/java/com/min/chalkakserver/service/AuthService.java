@@ -322,7 +322,11 @@ public class AuthService {
             .orElseThrow(() -> new AuthException("User not found"));
 
         user.updateNickname(request.getNickname());
-        user.updateProfileImageUrl(request.getProfileImageUrl());
+        if (Boolean.TRUE.equals(request.getRemoveProfileImage())) {
+            user.clearProfileImageUrl();
+        } else {
+            user.updateProfileImageUrl(request.getProfileImageUrl());
+        }
 
         log.info("User profile updated: userId={}", userId);
         

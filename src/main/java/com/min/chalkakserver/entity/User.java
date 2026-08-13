@@ -113,6 +113,14 @@ public class User {
         }
     }
 
+    /**
+     * 프로필 이미지를 비운다 (기본 아바타로 되돌림).
+     * null 전달은 "변경 없음"을 뜻하므로, 삭제는 이 메서드로만 가능하다.
+     */
+    public void clearProfileImageUrl() {
+        this.profileImageUrl = null;
+    }
+
     public void updateLastLogin() {
         this.lastLoginAt = LocalDateTime.now();
     }
