@@ -8,6 +8,8 @@ import com.min.chalkakserver.repository.RefreshTokenRepository;
 import com.min.chalkakserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,7 @@ public class PasswordResetService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final Environment environment;
 
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -64,8 +67,12 @@ public class PasswordResetService {
                 }
 
                 redisTemplate.opsForValue().set(CODE_KEY_PREFIX + email, code, CODE_TTL);
-                // 로컬 테스트용: 실제 SMTP 없이도 코드 확인 가능하도록 로그 출력
-                log.info("[DEV] 비밀번호 재설정 인증코드 생성: email={}, code={}", email, code);
+
+                // 인증코드는 비밀번호와 같은 등급의 비밀이다. 로그에 남기면 로그 열람 권한만으로
+                // 임의 계정의 비밀번호를 재설정할 수 있으므로, SMTP가 없는 local 프로파일에서만 남긴다.
+                if (environment.acceptsProfiles(Profiles.of("local"))) {
+                    log.info("[LOCAL] 비밀번호 재설정 인증코드: email={}, code={}", email, code);
+                }
             }, () -> {
                 throw notRegistered(email);
             });
