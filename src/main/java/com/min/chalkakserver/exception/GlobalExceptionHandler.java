@@ -160,6 +160,10 @@ public class GlobalExceptionHandler {
                 status = HttpStatus.NOT_FOUND;
                 error = "Not Found";
                 break;
+            case "SERVICE_UNAVAILABLE":
+                status = HttpStatus.SERVICE_UNAVAILABLE;
+                error = "Service Unavailable";
+                break;
             default:
                 status = HttpStatus.UNAUTHORIZED;
                 error = "Unauthorized";
