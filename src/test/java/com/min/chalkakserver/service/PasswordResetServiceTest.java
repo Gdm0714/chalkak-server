@@ -1,5 +1,8 @@
 package com.min.chalkakserver.service;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.min.chalkakserver.entity.User;
 import com.min.chalkakserver.entity.User.AuthProvider;
 import com.min.chalkakserver.exception.AuthException;
@@ -12,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,6 +50,8 @@ class PasswordResetServiceTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+    @Mock
+    private Environment environment;
 
     @InjectMocks
     private PasswordResetService passwordResetService;
@@ -83,6 +90,30 @@ class PasswordResetServiceTest {
 
         verify(valueOperations).set(eq("pwreset:code:" + EMAIL), anyString(), any());
         verify(emailService).sendPasswordResetCode(eq(EMAIL), anyString());
+    }
+
+    @Test
+    @DisplayName("local 프로파일이 아니면 인증코드를 로그에 남기지 않는다")
+    void neverLogsCodeOutsideLocalProfile() {
+        given(userRepository.findByEmailAndProvider(EMAIL, AuthProvider.EMAIL))
+            .willReturn(Optional.of(emailUser()));
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+
+        Logger logger = (Logger) LoggerFactory.getLogger(PasswordResetService.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+
+        try {
+            // environment 목은 acceptsProfiles에 false를 반환한다 (= 운영/개발 프로파일).
+            passwordResetService.requestReset(EMAIL);
+        } finally {
+            logger.detachAppender(appender);
+        }
+
+        assertThat(appender.list)
+            .extracting(ILoggingEvent::getFormattedMessage)
+            .noneMatch(message -> message.contains("code="));
     }
 
     @Test
