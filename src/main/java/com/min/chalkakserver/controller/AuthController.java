@@ -101,7 +101,9 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다."));
     }
 
-    @Operation(summary = "비밀번호 재설정 요청", description = "이메일로 6자리 인증코드 발송 (계정 존재 여부와 무관하게 200 반환)")
+    @Operation(summary = "비밀번호 재설정 요청",
+        description = "이메일 계정이 존재하면 6자리 인증코드 발송. 미가입 이메일은 404, "
+            + "소셜로만 가입된 이메일은 409를 반환한다.")
     @PostMapping("/password/reset/request")
     public ResponseEntity<Map<String, String>> requestPasswordReset(
             @Valid @RequestBody PasswordResetRequestDto request) {

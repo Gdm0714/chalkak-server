@@ -42,7 +42,11 @@ public class PasswordResetService {
 
     /**
      * 비밀번호 재설정 요청 - 인증코드 발송
-     * 이메일 열거(enumeration) 방지를 위해 계정 존재 여부와 무관하게 정상 반환한다.
+     *
+     * 이메일 계정이 없으면 발송하지 않고 오류로 알린다. 오지 않는 메일을 기다리게 하는 것보다
+     * 잘못 입력했음을 바로 알려주는 편이 낫다. 계정 열거(enumeration)는 이 방식으로 가능해지지만,
+     * 공개 API인 `POST /api/auth/find-provider`가 이미 같은 정보를 반환하므로 여기서 숨겨도
+     * 실질적인 보호가 되지 않는다.
      */
     public void requestReset(String email) {
         userRepository.findByEmailAndProvider(email, AuthProvider.EMAIL)
@@ -52,7 +56,38 @@ public class PasswordResetService {
                 emailService.sendPasswordResetCode(email, code);
                 // 로컬 테스트용: 실제 SMTP 없이도 코드 확인 가능하도록 로그 출력
                 log.info("[DEV] 비밀번호 재설정 인증코드 생성: email={}, code={}", email, code);
-            }, () -> log.info("비밀번호 재설정 요청 - 존재하지 않는 이메일 계정 (무시): {}", email));
+            }, () -> {
+                throw notRegistered(email);
+            });
+    }
+
+    /**
+     * 이메일 계정이 없을 때의 오류. 소셜로만 가입된 이메일이면 그 사실을 알려준다
+     * (비밀번호가 없는 계정이라 재설정 자체가 성립하지 않는다).
+     */
+    private AuthException notRegistered(String email) {
+        List<String> socialProviders = findProviders(email);
+
+        if (socialProviders.isEmpty()) {
+            log.info("비밀번호 재설정 요청 - 가입되지 않은 이메일: {}", email);
+            return new AuthException("가입되지 않은 이메일입니다. 이메일 주소를 확인해주세요.", "NOT_FOUND");
+        }
+
+        String labels = socialProviders.stream()
+            .map(PasswordResetService::providerLabel)
+            .collect(Collectors.joining(", "));
+        log.info("비밀번호 재설정 요청 - 소셜 가입 계정: email={}, providers={}", email, socialProviders);
+        return new AuthException(
+            labels + "(으)로 가입된 계정입니다. 해당 수단으로 로그인해주세요.", "CONFLICT");
+    }
+
+    private static String providerLabel(String provider) {
+        return switch (provider) {
+            case "KAKAO" -> "카카오";
+            case "NAVER" -> "네이버";
+            case "APPLE" -> "Apple";
+            default -> provider;
+        };
     }
 
     /**
