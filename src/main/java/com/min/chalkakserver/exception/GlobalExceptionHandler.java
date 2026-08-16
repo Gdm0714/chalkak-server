@@ -52,6 +52,81 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 콜라보 후보를 찾을 수 없는 경우
+     */
+    @ExceptionHandler(CollabCandidateNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCollabCandidateNotFoundException(
+            CollabCandidateNotFoundException ex, HttpServletRequest request) {
+
+        log.error("Collab candidate not found: {}", ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        if (ex.getCandidateId() != null) {
+            details.put("candidateId", ex.getCandidateId());
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * 포토북 사진을 찾을 수 없는 경우
+     */
+    @ExceptionHandler(PhotobookEntryNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePhotobookEntryNotFoundException(
+            PhotobookEntryNotFoundException ex, HttpServletRequest request) {
+
+        log.error("Photobook entry not found: {}", ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        if (ex.getEntryId() != null) {
+            details.put("entryId", ex.getEntryId());
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * 프레임 콜라보를 찾을 수 없는 경우
+     */
+    @ExceptionHandler(FrameCollabNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleFrameCollabNotFoundException(
+            FrameCollabNotFoundException ex, HttpServletRequest request) {
+
+        log.error("FrameCollab not found: {}", ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        if (ex.getFrameCollabId() != null) {
+            details.put("frameCollabId", ex.getFrameCollabId());
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(),
+            "Not Found",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
      * @Validated 기반 파라미터 검증 실패 (예: @RequestParam @Min/@Max)
      */
     @ExceptionHandler(ConstraintViolationException.class)
@@ -241,6 +316,27 @@ public class GlobalExceptionHandler {
             details
         );
         
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(DuplicateAvailabilityReportException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateAvailabilityReportException(
+            DuplicateAvailabilityReportException ex, HttpServletRequest request) {
+
+        log.error("Duplicate availability report: {}", ex.getMessage());
+
+        Map<String, Object> details = new HashMap<>();
+        details.put("frameCollabId", ex.getFrameCollabId());
+        details.put("photoBoothId", ex.getPhotoBoothId());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            HttpStatus.CONFLICT.value(),
+            "Conflict",
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 

@@ -5,7 +5,14 @@ import com.min.chalkakserver.dto.PhotoBoothRequestDto;
 import com.min.chalkakserver.dto.PhotoBoothResponseDto;
 import com.min.chalkakserver.dto.admin.AdminStatsDto;
 import com.min.chalkakserver.dto.admin.UserListResponseDto;
+import com.min.chalkakserver.dto.collabcandidate.CollabCandidateApproveRequestDto;
+import com.min.chalkakserver.dto.collabcandidate.CollabCandidateRequestDto;
+import com.min.chalkakserver.dto.collabcandidate.CollabCandidateResponseDto;
+import com.min.chalkakserver.dto.framecollab.FrameCollabDetailResponseDto;
+import com.min.chalkakserver.dto.framecollab.FrameCollabRequestDto;
 import com.min.chalkakserver.service.AdminService;
+import com.min.chalkakserver.service.CollabCandidateService;
+import com.min.chalkakserver.service.FrameCollabService;
 import com.min.chalkakserver.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,6 +37,8 @@ public class AdminController {
 
     private final AdminService adminService;
     private final TagService tagService;
+    private final FrameCollabService frameCollabService;
+    private final CollabCandidateService collabCandidateService;
 
     // ==================== 대시보드 ====================
 
@@ -116,6 +125,70 @@ public class AdminController {
     public ResponseEntity<Map<String, String>> deletePost(@PathVariable Long postId) {
         adminService.deletePost(postId);
         return ResponseEntity.ok(Map.of("message", "포스트가 삭제되었습니다."));
+    }
+
+    // ==================== 프레임 콜라보 관리 ====================
+
+    @Operation(summary = "프레임 콜라보 생성", description = "새 프레임 콜라보 등록 (입고 매장 포함 가능)")
+    @PostMapping("/frame-collabs")
+    public ResponseEntity<FrameCollabDetailResponseDto> createFrameCollab(
+            @Valid @RequestBody FrameCollabRequestDto request) {
+        return ResponseEntity.ok(frameCollabService.createCollab(request));
+    }
+
+    @Operation(summary = "프레임 콜라보 수정", description = "프레임 콜라보 정보 수정")
+    @PutMapping("/frame-collabs/{id}")
+    public ResponseEntity<FrameCollabDetailResponseDto> updateFrameCollab(
+            @PathVariable Long id,
+            @Valid @RequestBody FrameCollabRequestDto request) {
+        return ResponseEntity.ok(frameCollabService.updateCollab(id, request));
+    }
+
+    @Operation(summary = "프레임 콜라보 삭제", description = "프레임 콜라보 삭제")
+    @DeleteMapping("/frame-collabs/{id}")
+    public ResponseEntity<Map<String, String>> deleteFrameCollab(@PathVariable Long id) {
+        frameCollabService.deleteCollab(id);
+        return ResponseEntity.ok(Map.of("message", "프레임 콜라보가 삭제되었습니다."));
+    }
+
+    @Operation(summary = "콜라보 입고 매장 설정", description = "콜라보에 입고 매장 일괄 설정")
+    @PutMapping("/frame-collabs/{id}/booths")
+    public ResponseEntity<FrameCollabDetailResponseDto> setFrameCollabBooths(
+            @PathVariable Long id,
+            @RequestBody List<Long> photoBoothIds) {
+        return ResponseEntity.ok(frameCollabService.setPhotoBooths(id, photoBoothIds));
+    }
+
+    // ==================== 콜라보 후보 큐 ====================
+
+    @Operation(summary = "콜라보 후보 등록", description = "공지 텍스트를 붙여넣으면 파싱된 초안 후보를 생성합니다.")
+    @PostMapping("/collab-candidates")
+    public ResponseEntity<CollabCandidateResponseDto> createCollabCandidate(
+            @Valid @RequestBody CollabCandidateRequestDto request) {
+        return ResponseEntity.ok(collabCandidateService.createCandidate(request));
+    }
+
+    @Operation(summary = "콜라보 후보 목록", description = "상태별 후보 목록 조회 (pending/approved/rejected/all)")
+    @GetMapping("/collab-candidates")
+    public ResponseEntity<PagedResponseDto<CollabCandidateResponseDto>> getCollabCandidates(
+            @RequestParam(defaultValue = "pending") String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(collabCandidateService.getCandidates(status, page, size));
+    }
+
+    @Operation(summary = "콜라보 후보 승인", description = "후보를 승인해 프레임 콜라보로 등록합니다. body로 초안 필드 덮어쓰기 가능.")
+    @PostMapping("/collab-candidates/{id}/approve")
+    public ResponseEntity<FrameCollabDetailResponseDto> approveCollabCandidate(
+            @PathVariable Long id,
+            @RequestBody(required = false) @Valid CollabCandidateApproveRequestDto request) {
+        return ResponseEntity.ok(collabCandidateService.approveCandidate(id, request));
+    }
+
+    @Operation(summary = "콜라보 후보 거절", description = "후보를 거절 처리합니다.")
+    @PostMapping("/collab-candidates/{id}/reject")
+    public ResponseEntity<CollabCandidateResponseDto> rejectCollabCandidate(@PathVariable Long id) {
+        return ResponseEntity.ok(collabCandidateService.rejectCandidate(id));
     }
 
     // ==================== 태그 관리 ====================
