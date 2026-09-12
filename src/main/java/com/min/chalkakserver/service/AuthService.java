@@ -50,6 +50,9 @@ public class AuthService {
         User user = userRepository.findByProviderAndProviderId(provider, socialUserInfo.getId())
             .map(existingUser -> {
                 existingUser.updateProfile(socialUserInfo.getNickname(), socialUserInfo.getProfileImageUrl());
+                if (provider == AuthProvider.NAVER) {
+                    existingUser.fillMissingEmail(socialUserInfo.getEmail());
+                }
                 existingUser.updateLastLogin();
                 return existingUser;
             })
