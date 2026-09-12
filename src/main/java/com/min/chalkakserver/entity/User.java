@@ -101,6 +101,12 @@ public class User {
         }
     }
 
+    public void fillMissingEmail(String email) {
+        if ((this.email == null || this.email.isBlank()) && email != null && !email.isBlank()) {
+            this.email = email;
+        }
+    }
+
     public void updateNickname(String nickname) {
         if (nickname != null && !nickname.isBlank()) {
             this.nickname = nickname;
